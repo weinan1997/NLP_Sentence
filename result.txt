@@ -1,0 +1,7 @@
+CNN:
+data set        epoch        acc        all_acc
+books           16           85.3081%   83.8863%
+dvd             20           79.8883%   85.5072%
+electronics     9            85.9903%   84.9462%
+kitchen         10           84.4086%   83.8863%
+all             19           84.5466%
