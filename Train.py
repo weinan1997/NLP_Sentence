@@ -18,6 +18,7 @@ def train(train_set, dev_set, model, args):
     best_acc = 0
     for epoch in range(0, args["epoch_num"]):
         model.train()
+        ave_acc = 0.0
         for batch in range(0, batch_num):
 
             if batch == batch_num-1:
@@ -39,13 +40,20 @@ def train(train_set, dev_set, model, args):
             optimizer.step()
             corrects = (torch.max(output, 1)[1].view(target.size()) == target).sum()
             accuracy = 100.0 * float(corrects)/len(feature)
+            ave_acc = ave_acc + float(corrects)
             sys.stdout.write('\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(batch+epoch*batch_num, loss.item(), accuracy, corrects, len(feature)))
 
+        ave_acc = ave_acc / len(train_set[0]) * 100
+        print('\nTrain accuracy: {:.4f}%'.format(ave_acc))
         dev_acc = eval(dev_set, model, args)
         if dev_acc >= best_acc:
             best_acc = dev_acc
             best_epoch = epoch+1
             torch.save(model, args["data_set"] + '_cnn.model')
+        elif ave_acc > 95:
+            break
+        elif dev_acc < best_acc - 5:
+            break
     print('best epoch:{}    best accuracy:{:.4f}%'.format(best_epoch, best_acc))
 
 
