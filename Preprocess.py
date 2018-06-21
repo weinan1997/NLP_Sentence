@@ -94,27 +94,27 @@ def load_bin_vec(fname, vocab):
 # In[7]:
 
 
-def add_unknown_words(word_vecs, vocab, min_df=1, k=300):
+def add_unknown_words(word_vecs, vocab, k=300):
     """
     For words that occur in at least min_df documents, create a separate word vector.    
     0.25 is chosen so the unknown vectors have (approximately) same variance as pre-trained ones
     """
     for word in vocab:
-        if word not in word_vecs and vocab[word] >= min_df:
+        if word not in word_vecs:
             word_vecs[word] = np.random.uniform(-0.25,0.25,k)  
 
 
 # In[8]:
 
 
-def build_data_cv(data_folder, cv=10, clean_string=True):
+def build_data(data_folder, clean_string=True):
     """
     Loads data and split into 10 folds.
     """
     revs = []
     pos_review = data_folder[0]
     neg_review = data_folder[1]
-    vocab = defaultdict(float)
+    vocab = set()
     for review in pos_review:   
         rev = []
         rev.append(review.strip())
@@ -124,11 +124,11 @@ def build_data_cv(data_folder, cv=10, clean_string=True):
             orig_rev = " ".join(rev).lower()
         words = set(orig_rev.split())
         for word in words:
-            vocab[word] += 1
+            vocab.add(word)
         datum  = {"y":1, 
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(0,cv)}
+                  "split": np.random.randint(0, 10)}
         revs.append(datum)
     for review in neg_review:   
         rev = []
@@ -139,11 +139,11 @@ def build_data_cv(data_folder, cv=10, clean_string=True):
             orig_rev = " ".join(rev).lower()
         words = set(orig_rev.split())
         for word in words:
-            vocab[word] += 1
+            vocab.add(word)
         datum  = {"y":0, 
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(0,cv)}
+                  "split": np.random.randint(0, 10)}
         revs.append(datum)
     random.shuffle(revs)
     return revs, vocab
@@ -182,7 +182,7 @@ def get_idx_from_sent(sent, word_idx_map, max_l, k=300):
         x.append(0)
     return x
 
-def make_idx_data(revs, word_idx_map, max_l=100, k=300):
+def make_idx_data(revs, word_idx_map, max_l, k=300):
     """
     Transforms sentences into a 2-d matrix.
     """
@@ -204,44 +204,59 @@ def make_idx_data(revs, word_idx_map, max_l=100, k=300):
 # In[21]:
 
 
-def data_process(pos_file, neg_file, max_l=100):  
-    pos_reviews = review_extract(pos_file)
-    neg_reviews = review_extract(neg_file)
-    data_folder = [pos_reviews, neg_reviews]
-    print("loading data...")  
-    revs, vocab = build_data_cv(data_folder, cv=10, clean_string=True)
-    max_l = np.max(pd.DataFrame(revs)["num_words"])
-    print("data loaded!")
-    print("number of sentences: " + str(len(revs)))
-    print("vocab size: " + str(len(vocab)))
-    print("max sentence length: " + str(max_l))
+def data_process(max_l):  
+    max_remain = 0
+    data_file = ["books", "dvd", "electronics", "kitchen"]
+    revs_list, vocab_list = [], []
+    for file_name in data_file:
+        pos_file = "sorted_data/"+file_name+"/positive.review"
+        neg_file = "sorted_data/"+file_name+"/negative.review"
+        pos_reviews = review_extract(pos_file)
+        neg_reviews = review_extract(neg_file)
+        data_folder = [pos_reviews, neg_reviews]
+        print("loading data of {}...".format(file_name))  
+        revs, vocab = build_data(data_folder, clean_string=True)
+        revs_list.append(revs)
+        vocab_list.append(vocab)
+        max_length = np.max(pd.DataFrame(revs)["num_words"])
+        print("data loaded!")
+        print("number of sentences: " + str(len(revs)))
+        print("vocab size: " + str(len(vocab)))
+        print("max sentence length: " + str(max_length))
+        remain_l = int(np.percentile(pd.DataFrame(revs)["num_words"], max_l))
+        print("remain sentence length: " + str(remain_l) + "\n")
+        max_remain = max(max_remain, remain_l)
+    print("max remain sentence length: " + str(max_remain) + "\n")
+    vocab = set()
+    for v in vocab_list:
+        vocab.update(v)
     print("loading word2vec vectors...",)
     w2v = load_bin_vec("GoogleNews-vectors-negative300.bin", vocab)
     print("finish loading")
-    print("num words already in word2vec: " + str(len(w2v)))
+    print("num words already in word2vec: " + str(len(w2v)) + "\n")
     add_unknown_words(w2v, vocab)
     W, word_idx_map= get_W(w2v)
     
     print("create train, dev, and test sets")
-    processed_data = []
-    data_set = make_idx_data(revs, word_idx_map, max_l)
-    for data in data_set:
-        X = []
-        Y = []
-        for index_array in data:
-            x = []
-            for index in index_array[0:-1]:
-                x.append(W[index])
-            x = np.matrix(x)
-            X.append(x)
-            Y.append(index_array[-1])
-        processed_data.append([X, Y])
+    for i in range(len(data_file)):
+        processed_data = []
+        data_set = make_idx_data(revs_list[i], word_idx_map, max_remain)
+        for data in data_set:
+            X = []
+            Y = []
+            for index_array in data:
+                x = []
+                for index in index_array[0:-1]:
+                    x.append(W[index])
+                x = np.matrix(x)
+                X.append(x)
+                Y.append(index_array[-1])
+            processed_data.append([X, Y])
+        torch.save(processed_data, data_file[i] + ".wordvec")
     print("finish creating")
-    return processed_data
 
-def save_data(data_set, max_l=100):
-    data = data_process("sorted_data/"+data_set+"/positive.review", "sorted_data/"+data_set+"/negative.review")
-    torch.save(data, data_set + "_processed.wordvec")
+def save_data(max_l):
+    data = data_process(max_l)
     print("data saved")
 
 def load_data(file_name):

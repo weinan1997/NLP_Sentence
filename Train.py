@@ -8,7 +8,7 @@ import torch.nn.functional as F
 
 
 def train(train_set, dev_set, model, args):
-    optimizer = torch.optim.Adadelta(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters())
     batch_size = args["batch_size"]
     input_num = len(train_set[0])
     batch_num = input_num//batch_size
@@ -16,6 +16,8 @@ def train(train_set, dev_set, model, args):
         batch_num = batch_num + 1
     best_epoch = 0
     best_acc = 0
+    dec_count = 0
+    last_acc = 0
     for epoch in range(0, args["epoch_num"]):
         model.train()
         ave_acc = 0.0
@@ -44,16 +46,24 @@ def train(train_set, dev_set, model, args):
             sys.stdout.write('\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(batch+epoch*batch_num, loss.item(), accuracy, corrects, len(feature)))
 
         ave_acc = ave_acc / len(train_set[0]) * 100
-        print('\nTrain accuracy: {:.4f}%'.format(ave_acc))
+        print('\nEpoch: {} - Train accuracy: {:.4f}%'.format(epoch, ave_acc))
         dev_acc = eval(dev_set, model, args)
         if dev_acc >= best_acc:
             best_acc = dev_acc
-            best_epoch = epoch+1
-            torch.save(model, args["data_set"] + '_cnn.model')
-        elif ave_acc > 95:
+            best_epoch = epoch
+            torch.save(model, args["data_set"] + '_' + args["model"] + '.model')
+
+        if dev_acc < last_acc:
+            dec_count = dec_count + 1
+        else:
+            dec_count = 0
+        last_acc = dev_acc
+        if dec_count >= args["early_stop"]:
             break
-        elif dev_acc < best_acc - 5:
-            break
+        # elif ave_acc > 95:
+        #     break
+        # elif dev_acc < best_acc - 5:
+        #     break
     print('best epoch:{}    best accuracy:{:.4f}%'.format(best_epoch, best_acc))
 
 
@@ -71,7 +81,7 @@ def eval(data_set, model, args):
     correct = (torch.max(output, 1)[1].view(target.size()) == target).sum()
     size = len(feature)
     accuracy = 100.0 * float(correct)/size
-    print('\nEvaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(loss.item(), 
+    print('Evaluation - loss: {:.6f}  acc: {:.4f}%({}/{}) \n'.format(loss.item(), 
                                                                        accuracy, 
                                                                        correct, 
                                                                        size))
