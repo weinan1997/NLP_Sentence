@@ -1,8 +1,6 @@
 
 # coding: utf-8
 
-# In[3]:
-
 
 import numpy as np
 from collections import defaultdict
@@ -11,9 +9,6 @@ import pandas as pd
 import gensim
 import random
 import torch
-
-
-# In[4]:
 
 
 #Data Preprocess
@@ -256,7 +251,7 @@ def data_process(max_l):
     print("finish creating")
 
 def save_data(max_l):
-    data = data_process(max_l)
+    data_process(max_l)
     print("data saved")
 
 def load_data(file_name):
