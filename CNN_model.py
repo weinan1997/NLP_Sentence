@@ -18,15 +18,15 @@ class CNN_Sentence(nn.Module):
         super(CNN_Sentence, self).__init__()
         self.args = args
         
-        vec_len = args["vec_len"]
+        self.vec_len = args["vec_len"]
         self.filter_num = args["filter_num"]
-        kernel_sizes = args["kernel_sizes"]
-        kernel_num = args["kernel_num"]
-        dropout = args["dropout"]
+        self.kernel_sizes = args["kernel_sizes"]
+        self.kernel_num = args["kernel_num"]
+        self.dropout = args["dropout"]
         
-        self.convs = nn.ModuleList([nn.Conv2d(1, kernel_num, (k, vec_len)) for k in kernel_sizes])
-        self.dropout = nn.Dropout(dropout)
-        self.fc = nn.Linear(self.filter_num*kernel_num, 2)
+        self.convs = nn.ModuleList([nn.Conv2d(1, self.kernel_num, (k, self.vec_len)) for k in kernel_sizes])
+        self.dropout = nn.Dropout(self.dropout)
+        self.fc = nn.Linear(self.filter_num*self.kernel_num, 2)
         
     def forward(self, x):
         x = x.unsqueeze(1)

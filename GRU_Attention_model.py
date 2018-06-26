@@ -2,17 +2,17 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class Attention_Sentence(nn.Module):
+class GRU_Attention_Sentence(nn.Module):
 
     def __init__(self, args):
-        super(Attention_Sentence, self).__init__()
+        super(GRU_Attention_Sentence, self).__init__()
         self.args = args
         
         self.hidden_dim = args["attention_dim"]
         self.vec_len = args["vec_len"]
         self.batch_size = args["batch_size"]
         self.gru = nn.GRU(self.vec_len, self.hidden_dim, bidirectional=True)
-        self.att_weight = nn.Parameter(torch.Tensor(2*self.hidden_dim, 1))
+        self.att_weight = nn.Parameter(torch.rand(2*self.hidden_dim, 1))
         self.attention = nn.Linear(self.hidden_dim*2, 2*self.hidden_dim)
         self.fc = nn.Linear(self.hidden_dim*2, 2)
 

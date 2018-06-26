@@ -249,10 +249,12 @@ def data_process(max_l):
             processed_data.append([X, Y])
         torch.save(processed_data, data_file[i] + ".wordvec")
     print("finish creating")
+    return max_remain
 
 def save_data(max_l):
-    data_process(max_l)
+    max_remain = data_process(max_l)
     print("data saved")
+    return max_remain
 
 def load_data(file_name):
     data = torch.load(file_name)
