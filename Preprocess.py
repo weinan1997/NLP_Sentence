@@ -138,7 +138,7 @@ def build_data(data_folder, clean_string=True):
         datum  = {"y":0, 
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(0, 10)}
+                  "split": np.random.randint(1, 10)}
         revs.append(datum)
     random.shuffle(revs)
     return revs, vocab
