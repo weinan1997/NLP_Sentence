@@ -185,9 +185,9 @@ def make_idx_data(revs, word_idx_map, max_l, k=300):
     for rev in revs:
         sent = get_idx_from_sent(rev["text"], word_idx_map, max_l)
         sent.append(rev["y"])
-        if rev["split"]==8:            
+        if rev["split"]==1:            
             dev.append(sent)        
-        elif rev["split"]>=9:  
+        elif rev["split"]==2 or rev["split"]==3:  
             test.append(sent)   
         else:
             train.append(sent)
