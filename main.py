@@ -10,9 +10,41 @@ import Train
 import Preprocess
 import sys
 import numpy as np
+import argparse
 
-args = {"model":"cnn_att_pool", "vec_len":300, "max_l":90, "remain_l":426, "filter_num":3, "kernel_sizes":[3,4,5], "kernel_num":100, "dropout":0.5, "batch_size":50, "epoch_num":20, "early_stop":5, "data_set":"dvd", "eval":False, "lstm_dim":300, "layer_num":1, "attention_dim":100, "GPU":0}
-args["data_set"] = sys.argv[1]
+parser = argparse.ArgumentParser(description="Sentiment Analysis")
+parser.add_argument('-m', "--model", default="cnn", help="available models: cnn, lstm, gru_attention, cnn_att_pool")
+parser.add_argument("--max_l", default=90, help="percentage of sentences' lengths")
+parser.add_argument("--kernel_sizes", default=[3,4,5], help="kernel sizes for convolution")
+parser.add_argument("--kernel_num", default=100, help="number of output filters")
+parser.add_argument("--dropout", default=0.5, help="dropout")
+parser.add_argument('-b', "--batch_size", default=50, help="batch size")
+parser.add_argument('-e', "--epoch_num", default=20, help="Maximum epoch number")
+parser.add_argument("--early_stop", default=3, help="early stop number")
+parser.add_argument('-d', "--data_set", default="books", help="available data set: books, dvd, electronics, kitchen, all")
+parser.add_argument("--eval", default=False, type=bool, help="train or evaluation")
+parser.add_argument("--hidden_size", default=100, help="hidden size for LSTM")
+parser.add_argument('-a', "--attention_dim", default=100, help="attention size")
+parser.add_argument('-g', "--gpu", default=0, help="GPU number")
+options = parser.parse_args()
+args = {
+    "model": options.model,
+    "max_l": options.max_l,
+    "kernel_sizes": options.kernel_sizes,
+    "kernel_num": options.kernel_num,
+    "dropout": options.dropout,
+    "batch_size": options.batch_size,
+    "epoch_num": options.epoch_num,
+    "early_stop": options.early_stop,
+    "data_set": options.data_set,
+    "eval": options.eval,
+    "lstm_dim": options.hidden_size,
+    "attention_dim": options.attention_dim,
+    "GPU": options.gpu,
+    "vec_len": 300,
+    "layer_num": 1,
+    "remain_l": 426
+}
 
 data = []
 if args["data_set"] == "all":
