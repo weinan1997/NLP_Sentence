@@ -26,6 +26,7 @@ parser.add_argument("--eval", default=False, type=bool, help="train or evaluatio
 parser.add_argument("--hidden_size", default=100, help="hidden size for LSTM")
 parser.add_argument('-a', "--attention_dim", default=100, help="attention size")
 parser.add_argument('-g', "--gpu", default=0, help="GPU number")
+parser.add_argument('-s', "--seed", default=1, help="set random seed")
 options = parser.parse_args()
 args = {
     "model": options.model,
@@ -41,11 +42,14 @@ args = {
     "lstm_dim": options.hidden_size,
     "attention_dim": options.attention_dim,
     "GPU": options.gpu,
+    "seed": options.seed,
     "vec_len": 300,
     "layer_num": 1,
     "remain_l": 426
 }
 
+
+torch.manual_seed(args["seed"])
 data = []
 if args["data_set"] == "all":
     set1 = np.array(torch.load("books.wordvec"))
@@ -82,6 +86,7 @@ elif args["model"] == "SWEM_hier":
 elif args["model"] == "cnn_att_pool":
     model = CNN_Att_Pool_model.CNN_Att_Pool_Sentence(args)
 if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(args["seed"])
     model = model.cuda(args["GPU"])
 Train.train(data[0], data[1], model, args)
 print('\nTest set result:\n')
