@@ -34,6 +34,9 @@ def train(train_set, dev_set, model, args):
             target = np.array(target)
             feature = torch.tensor(feature)
             target = torch.tensor(target)
+            if torch.cuda.is_available():
+                feature = feature.cuda(args["GPU"])
+                target = target.cuda(args["GPU"])
 
             optimizer.zero_grad()
             output = model(feature)
@@ -75,6 +78,10 @@ def eval(data_set, model, args):
     target = np.array(target)
     feature = torch.tensor(feature)
     target = torch.tensor(target)
+    if torch.cuda.is_available():
+        feature = feature.cuda(args["GPU"])
+        target = target.cuda(args["GPU"])
+
     
     output = model(feature)
     loss = F.cross_entropy(output, target)

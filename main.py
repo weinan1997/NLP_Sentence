@@ -4,12 +4,13 @@ import CNN_model
 import LSTM_model
 import GRU_Attention_model
 import CNN_Attention_model
+import SWEM_hier_model
 import Train
 import Preprocess
 import sys
 import numpy as np
 
-args = {"model":"cnn_attention", "vec_len":300, "max_l":90, "remain_l":426, "filter_num":3, "kernel_sizes":[3,4,5], "kernel_num":100, "dropout":0.5, "batch_size":50, "epoch_num":20, "early_stop":3, "data_set":"dvd", "eval":True, "lstm_dim":300, "layer_num":1, "attention_dim":100}
+args = {"model":"SWEM_hier", "vec_len":300, "max_l":90, "remain_l":426, "filter_num":3, "kernel_sizes":[3,4,5], "kernel_num":100, "dropout":0.5, "batch_size":50, "epoch_num":20, "early_stop":5, "data_set":"dvd", "eval":False, "lstm_dim":300, "layer_num":1, "attention_dim":100}
 args["data_set"] = sys.argv[1]
 
 data = []
@@ -43,6 +44,10 @@ elif args["model"] == "gru_attention":
     model = GRU_Attention_model.GRU_Attention_Sentence(args)
 elif args["model"] == "cnn_attention":
     model = CNN_Attention_model.CNN_Attention_Sentence(args)
+elif args["model"] == "SWEM_hier":
+    model = SWEM_hier_model.SWEM_hier_Sentence(args)
+if torch.cuda.is_available():
+    model = model.cuda(args["GPU"])
 Train.train(data[0], data[1], model, args)
 print('\nTest set result:\n')
 Train.eval(data[2], model, args)
