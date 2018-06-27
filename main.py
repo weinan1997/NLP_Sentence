@@ -1,7 +1,7 @@
 import os
 import torch
 import CNN_model
-import LSTM_model
+import GRU_model
 import GRU_Attention_model
 import CNN_Attention_model
 import SWEM_hier_model
@@ -13,7 +13,7 @@ import numpy as np
 import argparse
 
 parser = argparse.ArgumentParser(description="Sentiment Analysis")
-parser.add_argument('-m', "--model", default="cnn", help="available models: cnn, lstm, gru_attention, cnn_att_pool")
+parser.add_argument('-m', "--model", default="cnn", help="available models: cnn, gru, gru_attention, cnn_att_pool")
 parser.add_argument("--max_l", default=90, help="percentage of sentences' lengths")
 parser.add_argument("--kernel_sizes", default=[3,4,5], help="kernel sizes for convolution")
 parser.add_argument("--kernel_num", default=100, help="number of output filters")
@@ -75,8 +75,8 @@ if args["eval"] == True:
 
 if args["model"] == "cnn":
     model = CNN_model.CNN_Sentence(args)
-elif args["model"] == "lstm":
-    model = LSTM_model.LSTM_Sentence(args)
+elif args["model"] == "gru":
+    model = GRU_model.GRU_Sentence(args)
 elif args["model"] == "gru_attention":
     model = GRU_Attention_model.GRU_Attention_Sentence(args)
 elif args["model"] == "cnn_attention":
