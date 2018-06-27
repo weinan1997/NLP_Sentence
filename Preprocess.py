@@ -79,7 +79,7 @@ def clean_str(string, TREC=False):
 
 def load_bin_vec(fname, vocab):
     word_vecs = {}
-    model = gensim.models.KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin',binary=True)
+    model = gensim.models.KeyedVectors.load_word2vec_format(fname, binary=True)
     for word in vocab:
         if word in model:
             word_vecs[word] = model[word]
@@ -226,7 +226,7 @@ def data_process(max_l):
     for v in vocab_list:
         vocab.update(v)
     print("loading word2vec vectors...",)
-    w2v = load_bin_vec("../../data1/GoogleNews-vectors-negative300.bin", vocab)
+    w2v = load_bin_vec("../../../data1/GoogleNews-vectors-negative300.bin", vocab)
     print("finish loading")
     print("num words already in word2vec: " + str(len(w2v)) + "\n")
     add_unknown_words(w2v, vocab)

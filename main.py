@@ -10,7 +10,7 @@ import Preprocess
 import sys
 import numpy as np
 
-args = {"model":"SWEM_hier", "vec_len":300, "max_l":90, "remain_l":426, "filter_num":3, "kernel_sizes":[3,4,5], "kernel_num":100, "dropout":0.5, "batch_size":50, "epoch_num":20, "early_stop":5, "data_set":"dvd", "eval":False, "lstm_dim":300, "layer_num":1, "attention_dim":100}
+args = {"model":"cnn", "vec_len":300, "max_l":90, "remain_l":426, "filter_num":3, "kernel_sizes":[3,4,5], "kernel_num":100, "dropout":0.5, "batch_size":50, "epoch_num":20, "early_stop":5, "data_set":"dvd", "eval":False, "lstm_dim":300, "layer_num":1, "attention_dim":100, "GPU":0}
 args["data_set"] = sys.argv[1]
 
 data = []

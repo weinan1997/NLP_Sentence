@@ -24,7 +24,7 @@ class CNN_Sentence(nn.Module):
         self.kernel_num = args["kernel_num"]
         self.dropout = args["dropout"]
         
-        self.convs = nn.ModuleList([nn.Conv2d(1, self.kernel_num, (k, self.vec_len)) for k in kernel_sizes])
+        self.convs = nn.ModuleList([nn.Conv2d(1, self.kernel_num, (k, self.vec_len)) for k in self.kernel_sizes])
         self.dropout = nn.Dropout(self.dropout)
         self.fc = nn.Linear(self.filter_num*self.kernel_num, 2)
         
