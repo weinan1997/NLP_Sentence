@@ -20,7 +20,7 @@ parser.add_argument("--kernel_sizes", default=[3,4,5], help="kernel sizes for co
 parser.add_argument("--kernel_num", default=100, help="number of output filters")
 parser.add_argument("--dropout", default=0.5, help="dropout")
 parser.add_argument('-b', "--batch_size", default=50, help="batch size")
-parser.add_argument('-e', "--epoch_num", default=20, help="Maximum epoch number")
+parser.add_argument('-e', "--epoch_num", default=30, help="Maximum epoch number")
 parser.add_argument("--early_stop", default=3, help="early stop number")
 parser.add_argument('-d', "--data_set", default="books", help="available data set: books, dvd, electronics, kitchen, all")
 parser.add_argument("--eval", default=False, type=bool, help="train or evaluation")
