@@ -68,6 +68,7 @@ def train(train_set, dev_set, model, args):
         # elif dev_acc < best_acc - 5:
         #     break
     print('best epoch:{}    best accuracy:{:.4f}%'.format(best_epoch, best_acc))
+    return best_acc
 
 
 
