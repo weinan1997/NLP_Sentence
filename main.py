@@ -78,7 +78,7 @@ def partition_data(args):
     else:
         if not os.path.exists(args["data_set"] + ".wordvec"):
             args["remain_l"] = Preprocess.save_data(args["max_l"])
-        data_array = Preprocess.load_data(args["data_set"] + ".wordvec")
+        data_array = torch.load(args["data_set"] + ".wordvec")
 
     print("partitioning data set...")
     test_index = args["cross_validation"]
