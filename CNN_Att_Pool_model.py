@@ -9,8 +9,8 @@ class CNN_Att_Pool_Sentence(nn.Module):
         self.args = args
 
         self.vec_len = args["vec_len"]
-        self.filter_num = args["filter_num"]
         self.kernel_sizes = args["kernel_sizes"]
+        self.filter_num = len(self.kernel_sizes)
         self.kernel_num = args["kernel_num"]
         self.dropout = args["dropout"]
         self.sentence_l = args["remain_l"]
