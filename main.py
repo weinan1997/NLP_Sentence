@@ -133,22 +133,30 @@ def main():
         Train.eval(data[2], model, args)
         exit()
 
-    model = find_model(args)
     torch.cuda.manual_seed_all(args["seed"])
 
     if args["test_all"]:
         args["data_set"] = "all"
-        data = partition_data(args)
-        Train.train(data[0], data[1], model, args)
-        print('\nTest set result:\n')
-        all_result = Train.eval(data[2], model, args)
-        model = torch.load("all_"+args["model"]+".model")
-        result = []
-        for domain in domain_set:
-            args["data_set"] = domain
+        result_list = []
+        for i in range(10):
+            args["cross_validation"] = i
             data = partition_data(args)
-            result.append(Train.eval(data[2], model, args))
-        print(result)
+            model = find_model(args)
+            Train.train(data[0], data[1], model, args)
+            print('\nTest set result:\n')
+            all_result = Train.eval(data[2], model, args)
+            model = torch.load("all_"+args["model"]+".model")
+            result = []
+            for domain in domain_set:
+                args["data_set"] = domain
+                data = partition_data(args)
+                result.append(Train.eval(data[2], model, args))
+            result.append(all_result)
+            result = np.array(result)
+            result_list.append(result)
+        np.set_printoptions(precision=4)
+        result_list = np.array(result_list)
+        print(result_list)
         exit()
         
 
@@ -162,8 +170,9 @@ def main():
             Train.train(data[0], data[1], model, args)
             print('\nTest set result:\n')
             result_list.append(Train.eval(data[2], model, args))
-        print(result_list)
         result = np.array(result_list)
+        np.set_printoptions(precision=4)
+        print(result)
         print('Average: {:.4f}%,    Standard Deviation: {:.4f}%'.format(result.mean(), result.std()))
     else:
         data = partition_data(args)
