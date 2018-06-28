@@ -28,7 +28,7 @@ parser.add_argument("--hidden_size", default=100, help="hidden size for LSTM")
 parser.add_argument('-a', "--attention_dim", default=100, help="attention size")
 parser.add_argument('-g', "--gpu", default=0, help="GPU number")
 parser.add_argument('-s', "--seed", default=1, help="set random seed")
-parser.add_argument('-c', "--cross_validation", default=9, help="set the data set as test set")
+parser.add_argument('-c', "--cross_validation", default=9, type=int, help="set the data set as test set")
 options = parser.parse_args()
 args = {
     "model": options.model,
