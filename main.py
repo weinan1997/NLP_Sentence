@@ -75,7 +75,8 @@ else:
     data_array = Preprocess.load_data(args["data_set"] + ".wordvec")
 
 print("partitioning data set...")
-test_set = data_array[args["cross_validation"]]
+test_index = args["cross_validation"]
+test_set = data_array[test_index]
 dev_index = random.randint(0, 9)
 while dev_index == args["cross_validation"]:
     dev_index = random.randint(0, 9)
