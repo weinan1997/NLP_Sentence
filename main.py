@@ -172,6 +172,7 @@ def main():
             print('\nTest set result:\n')
             result_list.append(Train.eval(data[2], model, args))
         result = np.array(result_list)
+        result = result.reshape(10, 1)
         np.set_printoptions(precision=4)
         print(result)
         print('Average: {:.4f}%,    Standard Deviation: {:.4f}%'.format(result.mean(), result.std()))
