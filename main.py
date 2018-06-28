@@ -101,19 +101,7 @@ def partition_data(args):
     print("finish partitioning!")
     return data
         
-
-def main():
-    args = parse_args()
-    torch.manual_seed(args["seed"])
-    random.seed(args["seed"])
-    data = []
-
-    if args["eval"]:
-        model = torch.load("all_"+args["model"]+".model")
-        data = partition_data(args)
-        Train.eval(data[2], model, args)
-        exit()
-
+def find_model(args):
     if args["model"] == "cnn":
         model = CNN_model.CNN_Sentence(args)
     elif args["model"] == "gru":
@@ -129,10 +117,24 @@ def main():
     else:
         print("No such model!")
         exit()
-
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(args["seed"])
         model = model.cuda(args["GPU"])
+    return model
+
+def main():
+    args = parse_args()
+    torch.manual_seed(args["seed"])
+    random.seed(args["seed"])
+    data = []
+
+    if args["eval"]:
+        model = torch.load("all_"+args["model"]+".model")
+        data = partition_data(args)
+        Train.eval(data[2], model, args)
+        exit()
+
+    model = find_model(args)
+    torch.cuda.manual_seed_all(args["seed"])
 
     if args["test_all"]:
         args["data_set"] = "all"
@@ -156,6 +158,7 @@ def main():
         for i in range(10):
             args["cross_validation"] = i
             data = partition_data(args)
+            model = find_model(args)
             Train.train(data[0], data[1], model, args)
             print('\nTest set result:\n')
             result_list.append(Train.eval(data[2], model, args))
