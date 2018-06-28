@@ -11,6 +11,7 @@ import Preprocess
 import sys
 import numpy as np
 import argparse
+import random
 
 parser = argparse.ArgumentParser(description="Sentiment Analysis")
 parser.add_argument('-m', "--model", default="cnn", help="available models: cnn, gru, gru_attention, cnn_att_pool")
@@ -27,6 +28,7 @@ parser.add_argument("--hidden_size", default=100, help="hidden size for LSTM")
 parser.add_argument('-a', "--attention_dim", default=100, help="attention size")
 parser.add_argument('-g', "--gpu", default=0, help="GPU number")
 parser.add_argument('-s', "--seed", default=1, help="set random seed")
+parser.add_argument('-c', "--cross_validation", default=9, help="set the data set as test set")
 options = parser.parse_args()
 args = {
     "model": options.model,
@@ -43,6 +45,7 @@ args = {
     "attention_dim": options.attention_dim,
     "GPU": options.gpu,
     "seed": options.seed,
+    "cross_validation": options.cross_validation,
     "vec_len": 300,
     "layer_num": 1,
     "remain_l": 426
@@ -50,23 +53,47 @@ args = {
 
 
 torch.manual_seed(args["seed"])
+random.seed(args["seed"])
 data = []
+data_array = []
+
 if args["data_set"] == "all":
     set1 = np.array(torch.load("books.wordvec"))
     set2 = np.array(torch.load("dvd.wordvec"))
     set3 = np.array(torch.load("electronics.wordvec"))
     set4 = np.array(torch.load("kitchen.wordvec"))
     d_set = [set1, set2, set3, set4]
-    for i in range(0, 3):
+    for i in range(0, 10):
         X, Y = [], []
         for j in range(0, len(d_set)):
             X = X + d_set[j][i][0]
             Y = Y + d_set[j][i][1]
-        data.append([X, Y])
+        data_array.append([X, Y])
 else:
     if not os.path.exists(args["data_set"] + ".wordvec"):
         args["remain_l"] = Preprocess.save_data(args["max_l"])
-    data = Preprocess.load_data(args["data_set"] + ".wordvec")
+    data_array = Preprocess.load_data(args["data_set"] + ".wordvec")
+
+print("partitioning data set...")
+test_set = data_array[args["cross_validation"]]
+dev_index = random.randint(0, 9)
+while dev_index == args["cross_validation"]:
+    dev_index = random.randint(0, 9)
+dev_set = data_array[dev_index]
+train_set = []
+for i in range(len(data_array)):
+    if i == args["cross_validation"] or i == dev_index:
+        continue
+    train_set.append(data_array[i])
+X, Y = [], []
+for i in range(len(train_set)):
+    X = X + train_set[i][0]
+    Y = Y + train_set[i][1]
+train_set = [X, Y]
+data = [train_set, dev_set, test_set]
+print("finish partitioning!")
+        
+
 
 if args["eval"] == True:
     model = torch.load("all_"+args["model"]+".model")

@@ -9,6 +9,7 @@ import pandas as pd
 import gensim
 import random
 import torch
+import os
 
 
 #Data Preprocess
@@ -123,7 +124,7 @@ def build_data(data_folder, clean_string=True):
         datum  = {"y":1, 
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(0, 10)}
+                  "split": np.random.randint(0, 9)}
         revs.append(datum)
     for review in neg_review:   
         rev = []
@@ -138,7 +139,7 @@ def build_data(data_folder, clean_string=True):
         datum  = {"y":0, 
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(1, 10)}
+                  "split": np.random.randint(0, 9)}
         revs.append(datum)
     random.shuffle(revs)
     return revs, vocab
@@ -181,20 +182,12 @@ def make_idx_data(revs, word_idx_map, max_l, k=300):
     """
     Transforms sentences into a 2-d matrix.
     """
-    train, dev, test = [], [], []
+    data_partitions = [list() for k in range(0, 10)]
     for rev in revs:
         sent = get_idx_from_sent(rev["text"], word_idx_map, max_l)
         sent.append(rev["y"])
-        if rev["split"]==1:            
-            dev.append(sent)        
-        elif rev["split"]==2 or rev["split"]==3:  
-            test.append(sent)   
-        else:
-            train.append(sent)
-    train = np.array(train,dtype="int")
-    dev = np.array(dev,dtype="int")
-    test = np.array(test,dtype="int")
-    return [train, dev, test]     
+        data_partitions[rev["split"]].append(sent)
+    return data_partitions     
 
 # In[21]:
 
@@ -226,17 +219,21 @@ def data_process(max_l):
     for v in vocab_list:
         vocab.update(v)
     print("loading word2vec vectors...",)
-    w2v = load_bin_vec("../../../data1/GoogleNews-vectors-negative300.bin", vocab)
+    path = "../../../data1/GoogleNews-vectors-negative300.bin"
+    if not os.path.exists(path):
+        path = "GoogleNews-vectors-negative300.bin"
+    w2v = load_bin_vec(path, vocab)
     print("finish loading")
     print("num words already in word2vec: " + str(len(w2v)) + "\n")
     add_unknown_words(w2v, vocab)
     W, word_idx_map= get_W(w2v)
     
-    print("create train, dev, and test sets")
+    print("create word vectors...")
     for i in range(len(data_file)):
         processed_data = []
         data_set = make_idx_data(revs_list[i], word_idx_map, max_remain)
         for data in data_set:
+            data = np.array(data)
             X = []
             Y = []
             for index_array in data:
