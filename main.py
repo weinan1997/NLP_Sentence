@@ -154,6 +154,7 @@ def main():
             result.append(all_result)
             result = np.array(result)
             result_list.append(result)
+            args["data_set"] = "all"
         np.set_printoptions(precision=4)
         result_list = np.array(result_list)
         print(result_list)
