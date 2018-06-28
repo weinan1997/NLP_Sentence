@@ -51,7 +51,7 @@ def train(train_set, dev_set, model, args):
         ave_acc = ave_acc / len(train_set[0]) * 100
         print('\nEpoch: {} - Train accuracy: {:.4f}%'.format(epoch, ave_acc))
         dev_acc = eval(dev_set, model, args)
-        if dev_acc >= best_acc:
+        if dev_acc > best_acc:
             best_acc = dev_acc
             best_epoch = epoch
             torch.save(model, args["data_set"] + '_' + args["model"] + '.model')
