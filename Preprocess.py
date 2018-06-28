@@ -1,7 +1,3 @@
-
-# coding: utf-8
-
-
 import numpy as np
 from collections import defaultdict
 import sys, re
@@ -27,9 +23,6 @@ def review_extract(filename):
     return clean_reviews
 
 
-# In[5]:
-
-
 def clean_str(string, TREC=False):
     """
     Tokenization/string cleaning for all datasets except for SST.
@@ -51,33 +44,6 @@ def clean_str(string, TREC=False):
     return string.strip() if TREC else string.strip().lower()
 
 
-# In[6]:
-
-
-# def load_bin_vec(fname, vocab):
-#     """
-#     Loads 300x1 word vecs from Google (Mikolov) word2vec
-#     """
-#     word_vecs = {}
-#     with open(fname, "rb") as f:
-#         header = f.readline()
-#         vocab_size, layer1_size = map(int, header.split())
-#         binary_len = np.dtype('float32').itemsize * layer1_size
-#         for line in range(vocab_size):
-#             word = []
-#             while True:
-#                 ch = f.read(1)
-#                 if ch == ' ':
-#                     word = ''.join(word)
-#                     break
-#                 if ch != '\n':
-#                     word.append(ch)   
-#             if word in vocab:
-#                 word_vecs[word] = np.fromstring(f.read(binary_len), dtype='float32')  
-#             else:
-#                 f.read(binary_len)
-#     return word_vecs
-
 def load_bin_vec(fname, vocab):
     word_vecs = {}
     model = gensim.models.KeyedVectors.load_word2vec_format(fname, binary=True)
@@ -85,9 +51,6 @@ def load_bin_vec(fname, vocab):
         if word in model:
             word_vecs[word] = model[word]
     return word_vecs
-
-
-# In[7]:
 
 
 def add_unknown_words(word_vecs, vocab, k=300):
@@ -98,9 +61,6 @@ def add_unknown_words(word_vecs, vocab, k=300):
     for word in vocab:
         if word not in word_vecs:
             word_vecs[word] = np.random.uniform(-0.25,0.25,k)  
-
-
-# In[8]:
 
 
 def build_data(data_folder, clean_string=True):
@@ -124,7 +84,7 @@ def build_data(data_folder, clean_string=True):
         datum  = {"y":1, 
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(0, 9)}
+                  "split": np.random.randint(0, 10)}
         revs.append(datum)
     for review in neg_review:   
         rev = []
@@ -139,13 +99,10 @@ def build_data(data_folder, clean_string=True):
         datum  = {"y":0, 
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(0, 9)}
+                  "split": np.random.randint(0, 10)}
         revs.append(datum)
     random.shuffle(revs)
     return revs, vocab
-
-
-# In[9]:
 
 
 def get_W(word_vecs, k=300):
@@ -188,8 +145,6 @@ def make_idx_data(revs, word_idx_map, max_l, k=300):
         sent.append(rev["y"])
         data_partitions[rev["split"]].append(sent)
     return data_partitions     
-
-# In[21]:
 
 
 def data_process(max_l):  
