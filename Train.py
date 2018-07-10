@@ -5,6 +5,7 @@ import torch
 import torch.autograd as autograd
 import torch.nn as nn
 import torch.nn.functional as F
+import DAM_model
 
 
 def train(train_set, dev_set, model, args):
@@ -26,23 +27,37 @@ def train(train_set, dev_set, model, args):
             if batch == batch_num-1:
                 feature = train_set[0][batch*batch_size:]
                 target = train_set[1][batch*batch_size:]
+                if args["model"] == "dam":
+                    domain = train_set[2][batch*batch_size:]
             else:
                 feature = train_set[0][batch*batch_size:(batch+1)*batch_size]
                 target = train_set[1][batch*batch_size:(batch+1)*batch_size]
+                if args["model"] == "dam":
+                    domain = train_set[2][batch*batch_size:(batch+1)*batch_size]
             
-            feature = np.array(feature)
-            target = np.array(target)
-            feature = torch.tensor(feature)
-            target = torch.tensor(target)
+            feature = torch.tensor(np.array(feature))
+            target = torch.tensor(np.array(target))
+            if args["model"] == "dam":
+                domain = torch.tensor(np.array(domain))
+            
             if torch.cuda.is_available():
                 feature = feature.cuda(args["GPU"])
                 target = target.cuda(args["GPU"])
+                if args["model"] == "dam":
+                    domain = domain.cuda(args["GPU"])
 
-            optimizer.zero_grad()
-            output = model(feature)
-            loss = F.cross_entropy(output, target)
-            loss.backward()
-            optimizer.step()
+            if args["model"] == "dam":
+                optimizer.zero_grad()
+                output, d = model(feature)
+                loss = F.cross_entropy(output, target) + args["regular"]*F.cross_entropy(d, domain)
+                loss.backward()
+                optimizer.step()
+            else:
+                optimizer.zero_grad()
+                output = model(feature)
+                loss = F.cross_entropy(output, target)
+                loss.backward()
+                optimizer.step()
             corrects = (torch.max(output, 1)[1].view(target.size()) == target).sum()
             accuracy = 100.0 * float(corrects)/len(feature)
             ave_acc = ave_acc + float(corrects)
@@ -74,17 +89,18 @@ def train(train_set, dev_set, model, args):
 
 def eval(data_set, model, args):
     model.eval()
-    feature, target = data_set
-    feature = np.array(feature)
-    target = np.array(target)
-    feature = torch.tensor(feature)
-    target = torch.tensor(target)
+    feature, target = data_set[0:2]
+    feature = torch.tensor(np.array(feature))
+    target = torch.tensor(np.array(target))
+    
     if torch.cuda.is_available():
         feature = feature.cuda(args["GPU"])
         target = target.cuda(args["GPU"])
 
-    
-    output = model(feature)
+    if args["model"] == "dam":
+        output, _ = model(feature)
+    else:
+        output = model(feature)
     loss = F.cross_entropy(output, target)
     correct = (torch.max(output, 1)[1].view(target.size()) == target).sum()
     size = len(feature)

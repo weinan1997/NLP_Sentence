@@ -6,6 +6,7 @@ import GRU_Attention_model
 import CNN_Attention_model
 import SWEM_hier_model
 import CNN_Att_Pool_model
+import DAM_model
 import Train
 import Preprocess
 import sys
@@ -14,6 +15,7 @@ import argparse
 import random
 
 domain_set = ["books", "dvd", "electronics", "kitchen"]
+model_set = ["cnn", "cnn_attention", "gru", "gru_attention", "dam"]
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Sentiment Analysis")
@@ -34,6 +36,7 @@ def parse_args():
     parser.add_argument('-c', "--cross_validation", default=9, type=int, help="set the data set as test set")
     parser.add_argument("--run_cv", default=False, type=bool, help="run through all cross validation test")
     parser.add_argument("--test_all", default=False, type=bool, help="train model on the whole set and test in each domain")
+    parser.add_argument('-r', "--regular", default=0.03, type=float, help="set the regular coefficient for DAM")
     options = parser.parse_args()
     args = {
         "model": options.model,
@@ -53,6 +56,7 @@ def parse_args():
         "cross_validation": options.cross_validation,
         "run_cv": options.run_cv,
         "test_all": options.test_all,
+        "regular": options.regular,
         "vec_len": 300,
         "layer_num": 1,
         "remain_l": 426
@@ -70,11 +74,12 @@ def partition_data(args):
         set4 = np.array(torch.load("kitchen.wordvec"))
         d_set = [set1, set2, set3, set4]
         for i in range(0, 10):
-            X, Y = [], []
+            X, Y, Z= [], [], []
             for j in range(0, len(d_set)):
                 X = X + d_set[j][i][0]
                 Y = Y + d_set[j][i][1]
-            data_array.append([X, Y])
+                Z = Z + [j]*len(d_set[j][i][0])
+            data_array.append([X, Y, Z])
     else:
         if not os.path.exists(args["data_set"] + ".wordvec"):
             args["remain_l"] = Preprocess.save_data(args["max_l"])
@@ -92,11 +97,13 @@ def partition_data(args):
         if i == args["cross_validation"] or i == dev_index:
             continue
         train_set.append(data_array[i])
-    X, Y = [], []
+    X, Y, Z = [], [], []
     for i in range(len(train_set)):
         X = X + train_set[i][0]
         Y = Y + train_set[i][1]
-    train_set = [X, Y]
+        if args["model"] == "dam":
+            Z = Z + train_set[i][2]
+    train_set = [X, Y, Z]
     data = [train_set, dev_set, test_set]
     print("finish partitioning!")
     return data
@@ -114,6 +121,8 @@ def find_model(args):
         model = SWEM_hier_model.SWEM_hier_Sentence(args)
     elif args["model"] == "cnn_att_pool":
         model = CNN_Att_Pool_model.CNN_Att_Pool_Sentence(args)
+    elif args["model"] == "dam":
+        model = DAM_model.DAM_Sentence(args)
     else:
         print("No such model!")
         exit()
