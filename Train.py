@@ -97,7 +97,7 @@ def eval(data_set, model, args):
         feature = feature.cuda(args["GPU"])
         target = target.cuda(args["GPU"])
 
-    if args["model"] == "dam":
+    if args["model"] == "dam" and args["data_set"] == "all":
         output, _ = model(feature)
     else:
         output = model(feature)

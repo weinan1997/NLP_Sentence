@@ -101,7 +101,7 @@ def partition_data(args):
     for i in range(len(train_set)):
         X = X + train_set[i][0]
         Y = Y + train_set[i][1]
-        if args["model"] == "dam":
+        if args["model"] == "dam" and args["data_set"] == "all":
             Z = Z + train_set[i][2]
     train_set = [X, Y, Z]
     data = [train_set, dev_set, test_set]
