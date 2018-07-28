@@ -27,29 +27,31 @@ def train(train_set, dev_set, model, args):
             if batch == batch_num-1:
                 feature = train_set[0][batch*batch_size:]
                 target = train_set[1][batch*batch_size:]
-                if args["model"] == "dam":
-                    domain = train_set[2][batch*batch_size:]
+                domain = train_set[2][batch*batch_size:]
             else:
                 feature = train_set[0][batch*batch_size:(batch+1)*batch_size]
                 target = train_set[1][batch*batch_size:(batch+1)*batch_size]
-                if args["model"] == "dam":
-                    domain = train_set[2][batch*batch_size:(batch+1)*batch_size]
+                domain = train_set[2][batch*batch_size:(batch+1)*batch_size]
             
             feature = torch.tensor(np.array(feature))
             target = torch.tensor(np.array(target))
-            if args["model"] == "dam":
-                domain = torch.tensor(np.array(domain))
+            domain = torch.tensor(np.array(domain))
             
             if torch.cuda.is_available():
                 feature = feature.cuda(args["GPU"])
                 target = target.cuda(args["GPU"])
-                if args["model"] == "dam":
-                    domain = domain.cuda(args["GPU"])
+                domain = domain.cuda(args["GPU"])
 
             if args["model"] == "dam":
                 optimizer.zero_grad()
                 output, d = model(feature)
                 loss = F.cross_entropy(output, target) + args["regular"]*F.cross_entropy(d, domain)
+                loss.backward()
+                optimizer.step()
+            elif args["model"] == "gs":
+                optimizer.zero_grad()
+                output, general_output, specific_outputs = model(feature)
+                loss = model.loss(output, general_output, specific_outputs, target, domain, args["lambda1"], args["lambda2"])
                 loss.backward()
                 optimizer.step()
             else:
@@ -99,6 +101,8 @@ def eval(data_set, model, args):
 
     if args["model"] == "dam":
         output, _ = model(feature)
+    elif args["model"] == "gs":
+        output, _, _ = model(feature)
     else:
         output = model(feature)
     loss = F.cross_entropy(output, target)

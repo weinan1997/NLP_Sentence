@@ -7,6 +7,7 @@ import CNN_Attention_model
 import SWEM_hier_model
 import CNN_Att_Pool_model
 import DAM_model
+import GS_model
 import Train
 import Preprocess
 import sys
@@ -19,7 +20,7 @@ model_set = ["cnn", "cnn_attention", "gru", "gru_attention", "dam"]
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Sentiment Analysis")
-    parser.add_argument('-m', "--model", default="cnn", help="available models: cnn, gru, gru_attention, cnn_att_pool")
+    parser.add_argument('-m', "--model", default="cnn", help="available models: cnn, gru, gru_attention, cnn_att_pool, gs")
     parser.add_argument("--max_l", default=90, type=int, help="percentage of sentences' lengths")
     parser.add_argument("--kernel_sizes", default=[3,4,5], type=list, help="kernel sizes for convolution")
     parser.add_argument("--kernel_num", default=100, type=int, help="number of output filters")
@@ -37,6 +38,8 @@ def parse_args():
     parser.add_argument("--run_cv", default=False, type=bool, help="run through all cross validation test")
     parser.add_argument("--test_all", default=False, type=bool, help="train model on the whole set and test in each domain")
     parser.add_argument('-r', "--regular", default=0.03, type=float, help="set the regular coefficient for DAM")
+    parser.add_argument("--lambda1", default=0.04, type=float, help="lambda1 for GS model")
+    parser.add_argument("--lambda2", default=0.01, type=float, help="lambda2 for GS model")
     options = parser.parse_args()
     args = {
         "model": options.model,
@@ -57,6 +60,8 @@ def parse_args():
         "run_cv": options.run_cv,
         "test_all": options.test_all,
         "regular": options.regular,
+        "lambda1": options.lambda1,
+        "lambda2": options.lambda2,
         "vec_len": 300,
         "layer_num": 1,
         "remain_l": 426
@@ -101,7 +106,7 @@ def partition_data(args):
     for i in range(len(train_set)):
         X = X + train_set[i][0]
         Y = Y + train_set[i][1]
-        if args["model"] == "dam" and args["data_set"] == "all":
+        if args["data_set"] == "all":
             Z = Z + train_set[i][2]
     train_set = [X, Y, Z]
     data = [train_set, dev_set, test_set]
@@ -123,10 +128,13 @@ def find_model(args):
         model = CNN_Att_Pool_model.CNN_Att_Pool_Sentence(args)
     elif args["model"] == "dam":
         model = DAM_model.DAM_Sentence(args)
+    elif args["model"] == "gs":
+        model = GS_model.GS_Sentence(args)
     else:
         print("No such model!")
         exit()
     if torch.cuda.is_available():
+        os.environ["CUDA_VISIBLE_DEVICES"] = args["GPU"]
         model = model.cuda(args["GPU"])
     return model
 
@@ -187,6 +195,7 @@ def main():
         print('Average: {:.4f}%,    Standard Deviation: {:.4f}%'.format(result.mean(), result.std()))
     else:
         data = partition_data(args)
+        model = find_model(args)
         Train.train(data[0], data[1], model, args)
         print('\nTest set result:\n')
         Train.eval(data[2], model, args)
