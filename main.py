@@ -83,7 +83,7 @@ def partition_data(args):
             for j in range(0, len(d_set)):
                 X = X + d_set[j][i][0]
                 Y = Y + d_set[j][i][1]
-                Z = Z + [j]*len(d_set[j][i][0])
+                Z = Z + d_set[j][i][2]
             data_array.append([X, Y, Z])
     else:
         if not os.path.exists(args["data_set"] + ".wordvec"):
@@ -106,8 +106,7 @@ def partition_data(args):
     for i in range(len(train_set)):
         X = X + train_set[i][0]
         Y = Y + train_set[i][1]
-        if args["data_set"] == "all":
-            Z = Z + train_set[i][2]
+        Z = Z + train_set[i][2]
     train_set = [X, Y, Z]
     data = [train_set, dev_set, test_set]
     print("finish partitioning!")

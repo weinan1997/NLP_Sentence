@@ -191,6 +191,7 @@ def data_process(max_l):
             data = np.array(data)
             X = []
             Y = []
+            Z = []
             for index_array in data:
                 x = []
                 for index in index_array[0:-1]:
@@ -198,7 +199,8 @@ def data_process(max_l):
                 x = np.matrix(x)
                 X.append(x)
                 Y.append(index_array[-1])
-            processed_data.append([X, Y])
+                Z.append(i)
+            processed_data.append([X, Y, Z])
         torch.save(processed_data, data_file[i] + ".wordvec")
     print("finish creating")
     return max_remain
