@@ -132,8 +132,8 @@ def eval(data_set, model, args):
             output = model(feature)
             loss = F.cross_entropy(output, target, size_average=False)
         correct = (torch.max(output, 1)[1].view(target.size()) == target).sum()
-        ave_loss = ave_loss + loss
-        total_correct = total_correct + correct
+        ave_loss += loss
+        total_correct += correct
     size = len(feature_all)
     ave_loss = ave_loss / size
     accuracy = 100.0 * float(total_correct)/size
