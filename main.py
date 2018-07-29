@@ -134,7 +134,7 @@ def find_model(args):
         print("No such model!")
         exit()
     if torch.cuda.is_available():
-        os.environ["CUDA_VISIBLE_DEVICES"] = args["GPU"]
+        os.environ["CUDA_VISIBLE_DEVICES"] = str(args["GPU"])
         model = model.cuda(args["GPU"])
     return model
 
