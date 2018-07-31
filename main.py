@@ -162,7 +162,7 @@ def main():
             print('\nTest set result:\n')
             all_result = Train.eval(data[2], model, args)
             if args["model"] == "gs":
-                model = torch.load(model, "gs"+"_hd_"+args["hidden_dim"]+"_l1_"+args["lambda1"]+"_l2_"+args["lambda2"]+".model")
+                model = torch.load(model, "gs"+"_hd_"+args["attention_dim"]+"_l1_"+args["lambda1"]+"_l2_"+args["lambda2"]+".model")
             else:
                 model = torch.load("all_"+args["model"]+".model")
             result = []
@@ -187,7 +187,7 @@ def main():
         print('\nTest set result:\n')
         all_result = Train.eval(data[2], model, args)
         if args["model"] == "gs":
-            model = torch.load(model, "gs"+"_hd_"+args["hidden_dim"]+"_l1_"+args["lambda1"]+"_l2_"+args["lambda2"]+".model")
+            model = torch.load(model, "gs"+"_hd_"+args["attention_dim"]+"_l1_"+args["lambda1"]+"_l2_"+args["lambda2"]+".model")
         else:
             model = torch.load("all_"+args["model"]+".model")
         result = []
