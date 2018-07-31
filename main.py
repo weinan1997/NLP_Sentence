@@ -160,9 +160,9 @@ def main():
             model = find_model(args)
             Train.train(data[0], data[1], model, args)
             print('\nTest set result:\n')
-            all_result = Train.eval(data[2], model, args)
             if args["model"] == "gs":
-                model = torch.load(model, "gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model")
+                with open("gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model", 'rb') as f:
+                    model = torch.load(model, f)
             else:
                 model = torch.load("all_"+args["model"]+".model")
             result = []
@@ -170,6 +170,7 @@ def main():
                 args["data_set"] = domain
                 data = partition_data(args)
                 result.append(Train.eval(data[2], model, args))
+            all_result = Train.eval(data[2], model, args)
             result.append(all_result)
             result = np.array(result)
             result_list.append(result)
@@ -185,12 +186,13 @@ def main():
         model = find_model(args)
         Train.train(data[0], data[1], model, args)
         print('\nTest set result:\n')
-        all_result = Train.eval(data[2], model, args)
         if args["model"] == "gs":
-            model = torch.load(model, "gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model")
+            with open("gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model", 'rb') as f:
+                model = torch.load(model, f)
         else:
             model = torch.load("all_"+args["model"]+".model")
         result = []
+        all_result = Train.eval(data[2], model, args)
         for domain in domain_set:
             args["data_set"] = domain
             data = partition_data(args)
