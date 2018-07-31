@@ -71,7 +71,10 @@ def train(train_set, dev_set, model, args):
         if dev_acc > best_acc:
             best_acc = dev_acc
             best_epoch = epoch
-            torch.save(model, args["data_set"] + '_' + args["model"] + '.model')
+            if args["model"] == "gs":
+                torch.save(model, "gs"+"_hd_"+args["hidden_dim"]+"_l1_"+args["lambda1"]+"_l2_"+args["lambda2"]+".model")
+            else:
+                torch.save(model, args["data_set"] + '_' + args["model"] + '.model')
 
         if dev_acc < last_acc:
             dec_count = dec_count + 1

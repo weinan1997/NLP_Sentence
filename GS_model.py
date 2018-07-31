@@ -9,7 +9,7 @@ class GS_Sentence(nn.Module):
         super(GS_Sentence, self).__init__()
         self.args = args
         self.domain_num = 4
-        self.hidden_dim = args["attention_dim"]
+        self.hidden_dim = args["hidden_dim"]
 
         self.general = General(args)
         self.specifics = [Specific(args, k) for k in range(self.domain_num)]

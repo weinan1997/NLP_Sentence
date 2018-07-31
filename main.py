@@ -161,7 +161,10 @@ def main():
             Train.train(data[0], data[1], model, args)
             print('\nTest set result:\n')
             all_result = Train.eval(data[2], model, args)
-            model = torch.load("all_"+args["model"]+".model")
+            if args["model"] == "gs":
+                model = torch.load(model, "gs"+"_hd_"+args["hidden_dim"]+"_l1_"+args["lambda1"]+"_l2_"+args["lambda2"]+".model")
+            else:
+                model = torch.load("all_"+args["model"]+".model")
             result = []
             for domain in domain_set:
                 args["data_set"] = domain
@@ -183,7 +186,10 @@ def main():
         Train.train(data[0], data[1], model, args)
         print('\nTest set result:\n')
         all_result = Train.eval(data[2], model, args)
-        model = torch.load("all_"+args["model"]+".model")
+        if args["model"] == "gs":
+            model = torch.load(model, "gs"+"_hd_"+args["hidden_dim"]+"_l1_"+args["lambda1"]+"_l2_"+args["lambda2"]+".model")
+        else:
+            model = torch.load("all_"+args["model"]+".model")
         result = []
         for domain in domain_set:
             args["data_set"] = domain
