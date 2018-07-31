@@ -192,7 +192,7 @@ def main():
         result.append(all_result)
         result = np.array(result)
         np.set_printoptions(precision=4)
-        print(result_list)
+        print(result)
         exit()
         
 
