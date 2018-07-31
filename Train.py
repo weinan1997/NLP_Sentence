@@ -72,7 +72,7 @@ def train(train_set, dev_set, model, args):
             best_acc = dev_acc
             best_epoch = epoch
             if args["model"] == "gs":
-                torch.save(model, "gs"+"_hd_"+args["attention_dim"]+"_l1_"+args["lambda1"]+"_l2_"+args["lambda2"]+".model")
+                torch.save(model, "gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model")
             else:
                 torch.save(model, args["data_set"] + '_' + args["model"] + '.model')
 
