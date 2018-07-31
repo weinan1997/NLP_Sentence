@@ -14,6 +14,7 @@ import sys
 import numpy as np
 import argparse
 import random
+import pickle
 
 domain_set = ["books", "dvd", "electronics", "kitchen"]
 model_set = ["cnn", "cnn_attention", "gru", "gru_attention", "dam"]
@@ -161,16 +162,15 @@ def main():
             Train.train(data[0], data[1], model, args)
             print('\nTest set result:\n')
             if args["model"] == "gs":
-                with open("gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model", 'rb') as f:
-                    model = torch.load(model, f)
+                model = torch.load("gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model")
             else:
                 model = torch.load("all_"+args["model"]+".model")
             result = []
+            all_result = Train.eval(data[2], model, args)
             for domain in domain_set:
                 args["data_set"] = domain
                 data = partition_data(args)
                 result.append(Train.eval(data[2], model, args))
-            all_result = Train.eval(data[2], model, args)
             result.append(all_result)
             result = np.array(result)
             result_list.append(result)
@@ -187,8 +187,7 @@ def main():
         Train.train(data[0], data[1], model, args)
         print('\nTest set result:\n')
         if args["model"] == "gs":
-            with open("gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model", 'rb') as f:
-                model = torch.load(model, f)
+            model = torch.load("gs"+"_hd_"+str(args["attention_dim"])+"_l1_"+str(args["lambda1"])+"_l2_"+str(args["lambda2"])+".model")
         else:
             model = torch.load("all_"+args["model"]+".model")
         result = []
