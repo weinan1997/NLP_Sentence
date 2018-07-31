@@ -50,7 +50,7 @@ def train(train_set, dev_set, model, args):
                 optimizer.step()
             elif args["model"] == "gs":
                 optimizer.zero_grad()
-                output, general_output, specific_outputs = model(feature)
+                output, general_output, specific_outputs = model(feature, domain)
                 loss = model.loss(output, general_output, specific_outputs, target, domain, args["lambda1"], args["lambda2"])
                 loss.backward()
                 optimizer.step()
@@ -108,7 +108,7 @@ def eval(data_set, model, args):
             output, d = model(feature)
             loss = F.cross_entropy(output, target) + args["regular"]*F.cross_entropy(d, domain)
         elif args["model"] == "gs":
-            output, general_output, specific_outputs = model(feature)
+            output, general_output, specific_outputs = model(feature, domain)
             loss = model.loss(output, general_output, specific_outputs, target, domain, args["lambda1"], args["lambda2"])
         else:
             output = model(feature)

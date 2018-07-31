@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 
 class GS_Sentence(nn.Module):
@@ -15,14 +16,17 @@ class GS_Sentence(nn.Module):
         if torch.cuda.is_available():
             self.general = self.general.cuda(args["GPU"])
             self.specifics = [self.specifics[k].cuda(args["GPU"]) for k in range(self.domain_num)]
-        self.fc = nn.Linear(self.hidden_dim*2*(1+self.domain_num), 2)   
+        self.fc = nn.Linear(self.hidden_dim*2*2, 2)   
 
-    def forward(self, x):
+    def forward(self, x, z):
         general_output = self.general(x)
         specific_outputs = [self.specifics[k](x) for k in range(self.domain_num)]
-        all_outputs = specific_outputs.copy()
-        all_outputs.append(general_output)
-        all_outputs = torch.cat(all_outputs, 2)
+        all_outputs = []
+        for row in range(x.size(0)):
+            all_outputs.append(specific_outputs[z[row]][row])
+        all_outputs = torch.cat(all_outputs, 0)
+        all_outputs = all_outputs.unsqueeze(1)
+        all_outputs = torch.cat((all_outputs, general_output), 2)
         all_outputs.squeeze(2)
         final_output = self.fc(all_outputs)
         final_output = final_output.squeeze(1)
