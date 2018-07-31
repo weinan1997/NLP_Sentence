@@ -151,7 +151,7 @@ def main():
 
     torch.cuda.manual_seed_all(args["seed"])
 
-    if args["test_all"]:
+    if args["test_all"] and args["run_cv"]:
         args["data_set"] = "all"
         result_list = []
         for i in range(10):
@@ -173,6 +173,25 @@ def main():
             args["data_set"] = "all"
         np.set_printoptions(precision=4)
         result_list = np.array(result_list)
+        print(result_list)
+        exit()
+    
+    if args["test_all"]:
+        args["data_set"] = "all"
+        data = partition_data(args)
+        model = find_model(args)
+        Train.train(data[0], data[1], model, args)
+        print('\nTest set result:\n')
+        all_result = Train.eval(data[2], model, args)
+        model = torch.load("all_"+args["model"]+".model")
+        result = []
+        for domain in domain_set:
+            args["data_set"] = domain
+            data = partition_data(args)
+            result.append(Train.eval(data[2], model, args))
+        result.append(all_result)
+        result = np.array(result)
+        np.set_printoptions(precision=4)
         print(result_list)
         exit()
         
