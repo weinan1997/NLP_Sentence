@@ -152,8 +152,13 @@ def data_process(max_l):
     data_file = ["books", "dvd", "electronics", "kitchen"]
     revs_list, vocab_list = [], []
     for file_name in data_file:
-        pos_file = "sorted_data/"+file_name+"/positive.review"
-        neg_file = "sorted_data/"+file_name+"/negative.review"
+        path = "../../../data1/"
+        if os.path.exists(path):
+            pos_file = path+"sorted_data/"+file_name+"/positive.review"
+            neg_file = path+"sorted_data/"+file_name+"/negative.review"
+        else:
+            pos_file = "sorted_data/"+file_name+"/positive.review"
+            neg_file = "sorted_data/"+file_name+"/negative.review"
         pos_reviews = review_extract(pos_file)
         neg_reviews = review_extract(neg_file)
         data_folder = [pos_reviews, neg_reviews]
