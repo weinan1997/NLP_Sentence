@@ -73,11 +73,18 @@ def parse_args():
 def partition_data(args):
     data = []
     data_array = []
+    path = "../../../data1/weinan/"
     if args["data_set"] == "all":
-        set1 = np.array(torch.load("books.wordvec"))
-        set2 = np.array(torch.load("dvd.wordvec"))
-        set3 = np.array(torch.load("electronics.wordvec"))
-        set4 = np.array(torch.load("kitchen.wordvec"))
+        if os.path.exists(path):
+            set1 = np.array(torch.load(path+"books.wordvec"))
+            set2 = np.array(torch.load(path+"dvd.wordvec"))
+            set3 = np.array(torch.load(path+"electronics.wordvec"))
+            set4 = np.array(torch.load(path+"kitchen.wordvec"))
+        else:
+            set1 = np.array(torch.load("books.wordvec"))
+            set2 = np.array(torch.load("dvd.wordvec"))
+            set3 = np.array(torch.load("electronics.wordvec"))
+            set4 = np.array(torch.load("kitchen.wordvec"))
         d_set = [set1, set2, set3, set4]
         for i in range(0, 10):
             X, Y, Z= [], [], []
@@ -87,9 +94,14 @@ def partition_data(args):
                 Z = Z + d_set[j][i][2]
             data_array.append([X, Y, Z])
     else:
-        if not os.path.exists(args["data_set"] + ".wordvec"):
-            args["remain_l"] = Preprocess.save_data(args["max_l"])
-        data_array = torch.load(args["data_set"] + ".wordvec")
+        if not os.path.exists(path):
+            if not os.path.exists(args["data_set"] + ".wordvec"):
+                args["remain_l"] = Preprocess.save_data(args["max_l"])
+            data_array = torch.load(args["data_set"] + ".wordvec")
+        else:
+            if not os.path.exists(path + args["data_set"] + ".wordvec"):
+                args["remain_l"] = Preprocess.save_data(args["max_l"])
+            data_array = torch.load(path + args["data_set"] + ".wordvec")
 
     print("partitioning data set...")
     test_index = args["cross_validation"]

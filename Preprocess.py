@@ -152,7 +152,7 @@ def data_process(max_l):
     data_file = ["books", "dvd", "electronics", "kitchen"]
     revs_list, vocab_list = [], []
     for file_name in data_file:
-        path = "../../../data1/"
+        path = "../../../data1/weinan/"
         if os.path.exists(path):
             pos_file = path+"sorted_data/"+file_name+"/positive.review"
             neg_file = path+"sorted_data/"+file_name+"/negative.review"
@@ -206,7 +206,11 @@ def data_process(max_l):
                 Y.append(index_array[-1])
                 Z.append(i)
             processed_data.append([X, Y, Z])
-        torch.save(processed_data, data_file[i] + ".wordvec")
+        path = "../../../data1/weinan/"
+        if os.path.exists(path):
+            torch.save(processed_data, path+data_file[i]+".wordvec")
+        else:
+            torch.save(processed_data, data_file[i] + ".wordvec")
     print("finish creating")
     return max_remain
 
