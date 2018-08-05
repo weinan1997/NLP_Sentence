@@ -15,7 +15,7 @@ class GS_Sentence(nn.Module):
         self.specifics = nn.ModuleList([Specific(args, k) for k in range(self.domain_num)])
         if torch.cuda.is_available():
             self.general = self.general.cuda(args["GPU"])
-            self.specifics = [self.specifics[k].cuda(args["GPU"]) for k in range(self.domain_num)]
+            self.specifics = nn.ModuleList([self.specifics[k].cuda(args["GPU"]) for k in range(self.domain_num)])
         self.fc = nn.Linear(self.hidden_dim*2*2, 2)   
 
     def forward(self, x, z):
