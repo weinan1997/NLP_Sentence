@@ -100,7 +100,6 @@ class Specific(nn.Module):
         for i in range(y_c.shape[0]):
             if z[i] != self.domain:
                 y_c[i] = 2
-        print(self.fc.weight)
         output = self.fc(x)
         loss = F.cross_entropy(output, y_c)
         return loss
