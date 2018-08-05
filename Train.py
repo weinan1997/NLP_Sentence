@@ -9,7 +9,7 @@ import DAM_model
 
 
 def train(train_set, dev_set, model, args):
-    optimizer = torch.optim.Adam(model.parameters())
+    optimizer = torch.optim.Adam(model.parameters(), lr=1)
     batch_size = args["batch_size"]
     input_num = len(train_set[0])
     batch_num = input_num//batch_size

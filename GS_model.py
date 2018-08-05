@@ -12,7 +12,7 @@ class GS_Sentence(nn.Module):
         self.hidden_dim = args["attention_dim"]
 
         self.general = General(args)
-        self.specifics = [Specific(args, k) for k in range(self.domain_num)]
+        self.specifics = nn.ModuleList([Specific(args, k) for k in range(self.domain_num)])
         if torch.cuda.is_available():
             self.general = self.general.cuda(args["GPU"])
             self.specifics = [self.specifics[k].cuda(args["GPU"]) for k in range(self.domain_num)]
@@ -21,17 +21,16 @@ class GS_Sentence(nn.Module):
     def forward(self, x, z):
         general_output = self.general(x)
         specific_outputs = [self.specifics[k](x) for k in range(self.domain_num)]
-        all_outputs = []
-        for row in range(x.size(0)):
-            all_outputs.append(specific_outputs[z[row]][row])
-        all_outputs = torch.cat(all_outputs, 0)
-        all_outputs = all_outputs.unsqueeze(1)
-        all_outputs = torch.cat((all_outputs, general_output), 2)
-        all_outputs.squeeze(2)
+        all_outputs = specific_outputs[z[0]][0]
+        for row in range(1, x.size(0)):
+            all_outputs = torch.cat((all_outputs, specific_outputs[z[row]][row]), 0)
+        general_output = general_output.squeeze(1)
+        all_outputs = torch.cat((all_outputs, general_output), 1)
         final_output = self.fc(all_outputs)
         final_output = final_output.squeeze(1)
         general_output = general_output.squeeze(1)
         specific_outputs = [specific_outputs[k].squeeze(1) for k in range(self.domain_num)]
+        # print(self.specifics[0].fc.weight)
         return final_output, general_output, specific_outputs
 
     def loss(self, final_output, general_output, specific_outputs, y, z, lambda1, lambda2):
@@ -97,12 +96,13 @@ class Specific(nn.Module):
         return output
 
     def loss(self, x, y, z):
-        y = y.clone()
-        for i in range(y.shape[0]):
+        y_c = y.clone()
+        for i in range(y_c.shape[0]):
             if z[i] != self.domain:
-                y[i] = 2
+                y_c[i] = 2
+        print(self.fc.weight)
         output = self.fc(x)
-        loss = F.cross_entropy(output, y)
+        loss = F.cross_entropy(output, y_c)
         return loss
 
             
