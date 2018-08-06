@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("--kernel_num", default=100, type=int, help="number of output filters")
     parser.add_argument("--dropout", default=0.5, type=float, help="dropout")
     parser.add_argument('-b', "--batch_size", default=50, type=int, help="batch size")
-    parser.add_argument('-e', "--epoch_num", default=30, type=int,help="Maximum epoch number")
+    parser.add_argument('-e', "--epoch_num", default=20, type=int,help="Maximum epoch number")
     parser.add_argument("--early_stop", default=5, type=int, help="early stop number")
     parser.add_argument('-d', "--data_set", default="books", help="available data set: books, dvd, electronics, kitchen, all")
     parser.add_argument("--eval", default=False, type=bool, help="train or evaluation")
