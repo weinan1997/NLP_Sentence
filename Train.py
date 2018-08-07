@@ -65,6 +65,8 @@ def train(train_set, dev_set, model, args):
             ave_acc = ave_acc + float(corrects)
             sys.stdout.write('\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(batch+epoch*batch_num, loss.item(), accuracy, corrects, len(feature)))
 
+            del feature, target, domain
+
         ave_acc = ave_acc / train_set.shape[0] * 100
         print('\nEpoch: {} - Train accuracy: {:.4f}%'.format(epoch, ave_acc))
         dev_acc = eval(dev_set, model, args)
