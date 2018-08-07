@@ -266,7 +266,7 @@ def main():
 
     if args["run_cv"]:
         result_list = []
-        for i in range(10):
+        for i in range(5):
             args["cross_validation"] = i
             revs = revs_dict[args["data_set"]]
             data = make_idx_data(revs, word_idx_map, args["remain_l"], args["cross_validation"])
