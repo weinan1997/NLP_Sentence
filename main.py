@@ -39,7 +39,8 @@ def parse_args():
     parser.add_argument("--test_all", default=False, type=bool, help="train model on the whole set and test in each domain")
     parser.add_argument('-r', "--regular", default=0.03, type=float, help="set the regular coefficient for DAM")
     parser.add_argument("--lambda1", default=0.04, type=float, help="lambda1 for GS model")
-    parser.add_argument("--lambda2", default=0.01, type=float, help="lambda2 for GS model")
+    parser.add_argument("--lambda2", default=0.04, type=float, help="lambda2 for GS model")
+    parser.add_argument('-r', "--learning_rate", default=0.001, type=float, help="learning rate")
     options = parser.parse_args()
     args = {
         "model": options.model,
@@ -62,6 +63,7 @@ def parse_args():
         "regular": options.regular,
         "lambda1": options.lambda1,
         "lambda2": options.lambda2,
+        "learning_rate": options.learning_rate
         "vec_len": 300,
         "layer_num": 1,
         "remain_l": 426

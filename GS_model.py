@@ -42,7 +42,7 @@ class GS_Sentence(nn.Module):
         loss = F.cross_entropy(final_output, y)
         loss = loss + lambda1 * self.general.loss(general_output, y)
         for i in range(self.domain_num):
-            loss = loss + lambda2 * self.specifics[i].loss(specific_outputs[i], y, z)
+            loss = loss + lambda2 / self.domain_num * self.specifics[i].loss(specific_outputs[i], y, z)
         return loss
 
 
