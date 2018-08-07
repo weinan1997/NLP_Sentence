@@ -114,8 +114,6 @@ def find_model(args):
         model = GRU_Attention_model.GRU_Attention_Sentence(args)
     elif args["model"] == "cnn_attention":
         model = CNN_Attention_model.CNN_Attention_Sentence(args)
-    elif args["model"] == "SWEM_hier":
-        model = SWEM_hier_model.SWEM_hier_Sentence(args)
     elif args["model"] == "cnn_att_pool":
         model = CNN_Att_Pool_model.CNN_Att_Pool_Sentence(args)
     elif args["model"] == "dam":
@@ -178,7 +176,8 @@ def main():
             result_list.append(result)
         np.set_printoptions(precision=4)
         result_list = np.array(result_list)
-        print(result_list)
+        print("Averages:", result_list.mean(axis=0))
+        print("Standard Deviations:", result_list.std(axis=0))
         exit()
     
     if args["test_all"]:
