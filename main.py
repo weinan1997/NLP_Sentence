@@ -41,7 +41,7 @@ def parse_args():
     parser.add_argument("--lambda1", default=0.04, type=float, help="lambda1 for GS model")
     parser.add_argument("--lambda2", default=0.04, type=float, help="lambda2 for GS model")
     parser.add_argument('-o', "--optim_func", default="Adam", help="Optimization function")
-    parser.add_argument('-r', "--learning_rate", default=0.001, type=float, help="learning rate")
+    parser.add_argument('-l', "--learning_rate", default=0.001, type=float, help="learning rate")
     options = parser.parse_args()
     args = {
         "model": options.model,
