@@ -4,7 +4,6 @@ import CNN_model
 import GRU_model
 import GRU_Attention_model
 import CNN_Attention_model
-import SWEM_hier_model
 import CNN_Att_Pool_model
 import DAM_model
 import GS_model
