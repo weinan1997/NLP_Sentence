@@ -239,6 +239,7 @@ def main():
     
     if args["test_all"]:
         args["data_set"] = "all"
+        revs = []
         for domain in domain_set:
             revs += revs_dict[domain]
         random.shuffle(revs)
