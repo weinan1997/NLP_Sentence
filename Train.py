@@ -11,7 +11,7 @@ import DAM_model
 def train(train_set, dev_set, model, args):
     optimizer = torch.optim.Adam(model.parameters())
     batch_size = args["batch_size"]
-    input_num = train.shape[0]
+    input_num = train_set.shape[0]
     batch_num = input_num//batch_size
     if input_num % batch_size != 0:
         batch_num = batch_num + 1
