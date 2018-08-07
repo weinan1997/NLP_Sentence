@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("--dropout", default=0.5, type=float, help="dropout")
     parser.add_argument('-b', "--batch_size", default=50, type=int, help="batch size")
     parser.add_argument('-e', "--epoch_num", default=30, type=int,help="Maximum epoch number")
-    parser.add_argument("--early_stop", default=3, type=int, help="early stop number")
+    parser.add_argument("--early_stop", default=5, type=int, help="early stop number")
     parser.add_argument('-d', "--data_set", default="books", help="available data set: books, dvd, electronics, kitchen, all")
     parser.add_argument("--eval", default=False, type=bool, help="train or evaluation")
     parser.add_argument("--hidden_size", default=100, type=int, help="hidden size for LSTM")
@@ -40,8 +40,8 @@ def parse_args():
     parser.add_argument('-r', "--regular", default=0.03, type=float, help="set the regular coefficient for DAM")
     parser.add_argument("--lambda1", default=0.04, type=float, help="lambda1 for GS model")
     parser.add_argument("--lambda2", default=0.04, type=float, help="lambda2 for GS model")
-    parser.add_argument('-o', "--optim_func", default="Adam", help="Optimization function")
-    parser.add_argument('-l', "--learning_rate", default=0.001, type=float, help="learning rate")
+    parser.add_argument('-o', "--optim_func", default="SGD", help="Optimization function")
+    parser.add_argument('-l', "--learning_rate", default=0.05, type=float, help="learning rate")
     options = parser.parse_args()
     args = {
         "model": options.model,
