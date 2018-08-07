@@ -9,7 +9,12 @@ import DAM_model
 
 
 def train(train_set, dev_set, model, args):
-    optimizer = torch.optim.Adam(model.parameters(), lr=args["learning_rate"])
+    if args["optim_func"] == "Adam":
+        optimizer = torch.optim.Adam(model.parameters(), lr=args["learning_rate"])
+    elif args["optim_func"] == "Adagrad":
+        optimizer = torch.optim.Adagrad(model.parameters(), lr=args["learning_rate"])
+    elif args["optim_func"] == "SGD":
+        optimizer = torch.optim.SGD(model.parameters(), lr=args["learning_rate"], momentum=0.9)
     batch_size = args["batch_size"]
     input_num = train_set.shape[0]
     batch_num = input_num//batch_size

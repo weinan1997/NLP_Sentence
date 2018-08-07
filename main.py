@@ -40,6 +40,7 @@ def parse_args():
     parser.add_argument('-r', "--regular", default=0.03, type=float, help="set the regular coefficient for DAM")
     parser.add_argument("--lambda1", default=0.04, type=float, help="lambda1 for GS model")
     parser.add_argument("--lambda2", default=0.04, type=float, help="lambda2 for GS model")
+    parser.add_argument('-o', "--optim_func", default="Adam", help="Optimization function")
     parser.add_argument('-r', "--learning_rate", default=0.001, type=float, help="learning rate")
     options = parser.parse_args()
     args = {
@@ -63,7 +64,8 @@ def parse_args():
         "regular": options.regular,
         "lambda1": options.lambda1,
         "lambda2": options.lambda2,
-        "learning_rate": options.learning_rate
+        "optim_func": options.optim_func,
+        "learning_rate": options.learning_rate,
         "vec_len": 300,
         "layer_num": 1,
         "remain_l": 426
