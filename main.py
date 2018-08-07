@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("--dropout", default=0.5, type=float, help="dropout")
     parser.add_argument('-b', "--batch_size", default=50, type=int, help="batch size")
     parser.add_argument('-e', "--epoch_num", default=30, type=int,help="Maximum epoch number")
-    parser.add_argument("--early_stop", default=5, type=int, help="early stop number")
+    parser.add_argument("--early_stop", default=3, type=int, help="early stop number")
     parser.add_argument('-d', "--data_set", default="books", help="available data set: books, dvd, electronics, kitchen, all")
     parser.add_argument("--eval", default=False, type=bool, help="train or evaluation")
     parser.add_argument("--hidden_size", default=100, type=int, help="hidden size for LSTM")
@@ -67,62 +67,6 @@ def parse_args():
         "remain_l": 426
     }
     return args
-
-
-# def partition_data(args):
-#     data = []
-#     data_array = []
-#     path = "../../../data1/weinan/"
-#     if args["data_set"] == "all":
-#         if os.path.exists(path):
-#             set1 = np.array(torch.load(path+"books.wordvec"))
-#             set2 = np.array(torch.load(path+"dvd.wordvec"))
-#             set3 = np.array(torch.load(path+"electronics.wordvec"))
-#             set4 = np.array(torch.load(path+"kitchen.wordvec"))
-#         else:
-#             set1 = np.array(torch.load("books.wordvec"))
-#             set2 = np.array(torch.load("dvd.wordvec"))
-#             set3 = np.array(torch.load("electronics.wordvec"))
-#             set4 = np.array(torch.load("kitchen.wordvec"))
-#         d_set = [set1, set2, set3, set4]
-#         for i in range(0, 10):
-#             X, Y, Z= [], [], []
-#             for j in range(0, len(d_set)):
-#                 X = X + d_set[j][i][0]
-#                 Y = Y + d_set[j][i][1]
-#                 Z = Z + d_set[j][i][2]
-#             data_array.append([X, Y, Z])
-#     else:
-#         if not os.path.exists(path):
-#             if not os.path.exists(args["data_set"] + ".wordvec"):
-#                 args["remain_l"] = Preprocess.save_data(args["max_l"])
-#             data_array = torch.load(args["data_set"] + ".wordvec")
-#         else:
-#             if not os.path.exists(path + args["data_set"] + ".wordvec"):
-#                 args["remain_l"] = Preprocess.save_data(args["max_l"])
-#             data_array = torch.load(path + args["data_set"] + ".wordvec")
-
-#     print("partitioning data set...")
-#     test_index = args["cross_validation"]
-#     test_set = data_array[test_index]
-#     dev_index = random.randint(0, 9)
-#     while dev_index == args["cross_validation"]:
-#         dev_index = random.randint(0, 9)
-#     dev_set = data_array[dev_index]
-#     train_set = []
-#     for i in range(len(data_array)):
-#         if i == args["cross_validation"] or i == dev_index:
-#             continue
-#         train_set.append(data_array[i])
-#     X, Y, Z = [], [], []
-#     for i in range(len(train_set)):
-#         X = X + train_set[i][0]
-#         Y = Y + train_set[i][1]
-#         Z = Z + train_set[i][2]
-#     train_set = [X, Y, Z]
-#     data = [train_set, dev_set, test_set]
-#     print("finish partitioning!")
-#     return data
         
 
 def get_idx_from_sent(sent, word_idx_map, max_l, k=300):

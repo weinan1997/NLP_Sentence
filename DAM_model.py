@@ -18,7 +18,7 @@ class DAM_Sentence(nn.Module):
         self.embedding = nn.Embedding(self.word2vec.shape[0], self.vec_len)
         self.embedding.weight.data.copy_(torch.from_numpy(self.word2vec))
         self.domain_lstm = nn.LSTM(self.vec_len, self.hidden_dim, bidirectional=True)
-        self.dropout1 = nn.Dropout(self.dp)
+        self.dropout1 = nn.Dropout(self.dp, inplace=True)
         self.domain_fc = nn.Linear(2*self.hidden_dim, 4)
         self.sentiment_lstm = nn.LSTM(self.vec_len, self.hidden_dim, bidirectional=True)
         self.attention = nn.Linear(self.hidden_dim*4, 1)
@@ -43,7 +43,7 @@ class DAM_Sentence(nn.Module):
         alpha = alpha.permute(0, 2, 1)
         Hs = torch.bmm(alpha, Hs)
         Hs = Hs.squeeze(1)
-        Hs = self.dropout1(Hs)
+        self.dropout1(Hs)
         output = self.sentiment_fc(Hs)
         return [output, d]
 

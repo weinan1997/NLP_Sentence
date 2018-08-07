@@ -19,7 +19,7 @@ class GRU_Attention_Sentence(nn.Module):
         self.gru = nn.GRU(self.vec_len, self.hidden_dim, bidirectional=True)
         self.att_weight = nn.Parameter(torch.rand(2*self.hidden_dim, 1))
         self.attention = nn.Linear(self.hidden_dim*2, 2*self.hidden_dim)
-        self.dropout = nn.Dropout(self.dp)
+        self.dropout = nn.Dropout(self.dp, inplace=True)
         self.fc = nn.Linear(self.hidden_dim*2, 2)
 
     def forward(self, x):
@@ -33,6 +33,6 @@ class GRU_Attention_Sentence(nn.Module):
         u = u.permute(0, 2, 1)
         output = torch.bmm(u, h)
         output = output.squeeze(1)
-        output = self.dropout(output)
+        self.dropout(output)
         output = self.fc(output)
         return output

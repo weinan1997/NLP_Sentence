@@ -21,7 +21,7 @@ class CNN_Attention_Sentence(nn.Module):
         self.convs = nn.ModuleList([nn.Conv2d(1, self.kernel_num, (k, self.vec_len)) for k in self.kernel_sizes])
         self.attention = nn.Linear(self.sentence_l, self.sentence_l)
         self.att_weight = nn.Parameter(torch.rand(self.sentence_l, 1))
-        self.dropout = nn.Dropout(self.dp)
+        self.dropout = nn.Dropout(self.dp, inplace=True)
         self.fc = nn.Linear(self.sentence_l, 2)
 
     def forward(self, x):
@@ -39,6 +39,6 @@ class CNN_Attention_Sentence(nn.Module):
         u = u.permute(0, 2, 1)
         x = torch.bmm(u, x)
         x = x.squeeze(1)
-        x = self.dropout(x)
+        self.dropout(x)
         x = self.fc(x)
         return x
