@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("--kernel_num", default=100, type=int, help="number of output filters")
     parser.add_argument("--dropout", default=0.5, type=float, help="dropout")
     parser.add_argument('-b', "--batch_size", default=50, type=int, help="batch size")
-    parser.add_argument('-e', "--epoch_num", default=20, type=int,help="Maximum epoch number")
+    parser.add_argument('-e', "--epoch_num", default=30, type=int,help="Maximum epoch number")
     parser.add_argument("--early_stop", default=5, type=int, help="early stop number")
     parser.add_argument('-d', "--data_set", default="books", help="available data set: books, dvd, electronics, kitchen, all")
     parser.add_argument("--eval", default=False, type=bool, help="train or evaluation")
@@ -70,61 +70,98 @@ def parse_args():
     return args
 
 
-def partition_data(args):
-    data = []
-    data_array = []
-    path = "../../../data1/weinan/"
-    if args["data_set"] == "all":
-        if os.path.exists(path):
-            set1 = np.array(torch.load(path+"books.wordvec"))
-            set2 = np.array(torch.load(path+"dvd.wordvec"))
-            set3 = np.array(torch.load(path+"electronics.wordvec"))
-            set4 = np.array(torch.load(path+"kitchen.wordvec"))
-        else:
-            set1 = np.array(torch.load("books.wordvec"))
-            set2 = np.array(torch.load("dvd.wordvec"))
-            set3 = np.array(torch.load("electronics.wordvec"))
-            set4 = np.array(torch.load("kitchen.wordvec"))
-        d_set = [set1, set2, set3, set4]
-        for i in range(0, 10):
-            X, Y, Z= [], [], []
-            for j in range(0, len(d_set)):
-                X = X + d_set[j][i][0]
-                Y = Y + d_set[j][i][1]
-                Z = Z + d_set[j][i][2]
-            data_array.append([X, Y, Z])
-    else:
-        if not os.path.exists(path):
-            if not os.path.exists(args["data_set"] + ".wordvec"):
-                args["remain_l"] = Preprocess.save_data(args["max_l"])
-            data_array = torch.load(args["data_set"] + ".wordvec")
-        else:
-            if not os.path.exists(path + args["data_set"] + ".wordvec"):
-                args["remain_l"] = Preprocess.save_data(args["max_l"])
-            data_array = torch.load(path + args["data_set"] + ".wordvec")
+# def partition_data(args):
+#     data = []
+#     data_array = []
+#     path = "../../../data1/weinan/"
+#     if args["data_set"] == "all":
+#         if os.path.exists(path):
+#             set1 = np.array(torch.load(path+"books.wordvec"))
+#             set2 = np.array(torch.load(path+"dvd.wordvec"))
+#             set3 = np.array(torch.load(path+"electronics.wordvec"))
+#             set4 = np.array(torch.load(path+"kitchen.wordvec"))
+#         else:
+#             set1 = np.array(torch.load("books.wordvec"))
+#             set2 = np.array(torch.load("dvd.wordvec"))
+#             set3 = np.array(torch.load("electronics.wordvec"))
+#             set4 = np.array(torch.load("kitchen.wordvec"))
+#         d_set = [set1, set2, set3, set4]
+#         for i in range(0, 10):
+#             X, Y, Z= [], [], []
+#             for j in range(0, len(d_set)):
+#                 X = X + d_set[j][i][0]
+#                 Y = Y + d_set[j][i][1]
+#                 Z = Z + d_set[j][i][2]
+#             data_array.append([X, Y, Z])
+#     else:
+#         if not os.path.exists(path):
+#             if not os.path.exists(args["data_set"] + ".wordvec"):
+#                 args["remain_l"] = Preprocess.save_data(args["max_l"])
+#             data_array = torch.load(args["data_set"] + ".wordvec")
+#         else:
+#             if not os.path.exists(path + args["data_set"] + ".wordvec"):
+#                 args["remain_l"] = Preprocess.save_data(args["max_l"])
+#             data_array = torch.load(path + args["data_set"] + ".wordvec")
 
-    print("partitioning data set...")
-    test_index = args["cross_validation"]
-    test_set = data_array[test_index]
-    dev_index = random.randint(0, 9)
-    while dev_index == args["cross_validation"]:
-        dev_index = random.randint(0, 9)
-    dev_set = data_array[dev_index]
-    train_set = []
-    for i in range(len(data_array)):
-        if i == args["cross_validation"] or i == dev_index:
-            continue
-        train_set.append(data_array[i])
-    X, Y, Z = [], [], []
-    for i in range(len(train_set)):
-        X = X + train_set[i][0]
-        Y = Y + train_set[i][1]
-        Z = Z + train_set[i][2]
-    train_set = [X, Y, Z]
-    data = [train_set, dev_set, test_set]
-    print("finish partitioning!")
-    return data
+#     print("partitioning data set...")
+#     test_index = args["cross_validation"]
+#     test_set = data_array[test_index]
+#     dev_index = random.randint(0, 9)
+#     while dev_index == args["cross_validation"]:
+#         dev_index = random.randint(0, 9)
+#     dev_set = data_array[dev_index]
+#     train_set = []
+#     for i in range(len(data_array)):
+#         if i == args["cross_validation"] or i == dev_index:
+#             continue
+#         train_set.append(data_array[i])
+#     X, Y, Z = [], [], []
+#     for i in range(len(train_set)):
+#         X = X + train_set[i][0]
+#         Y = Y + train_set[i][1]
+#         Z = Z + train_set[i][2]
+#     train_set = [X, Y, Z]
+#     data = [train_set, dev_set, test_set]
+#     print("finish partitioning!")
+#     return data
         
+
+def get_idx_from_sent(sent, word_idx_map, max_l, k=300):
+    """
+    Transforms sentence into a list of indices. Pad with zeroes. Remove words that exceed max_l.
+    """
+    x = []
+    words = sent.split()
+    if len(words) > max_l:
+        words = words[:max_l]
+    for word in words:
+        if word in word_idx_map:
+            x.append(word_idx_map[word])
+    while len(x) < max_l:
+        x.append(0)
+    return x
+
+def make_idx_data(revs, word_idx_map, max_l, cv, k=300):
+    """
+    Transforms sentences into a 2-d matrix.
+    """
+    train, dev, test = [], [], []
+    temp = []
+    for rev in revs:
+        sent = get_idx_from_sent(rev["text"], word_idx_map, max_l)
+        sent.append(rev["y"])
+        sent.append(rev["domain"])
+        if rev["split"] == cv:
+            test.append(sent)
+        else:
+            temp.append(sent)
+    dev_point = int(len(temp) * 0.9)
+    train = np.array(temp[:dev_point], dtype="int")
+    dev = np.array(temp[dev_point:], dtype="int")
+    test = np.array(test, dtype="int")
+    return train, dev, test
+
+
 def find_model(args):
     if args["model"] == "cnn":
         model = CNN_model.CNN_Sentence(args)
@@ -152,13 +189,19 @@ def find_model(args):
 
 def main():
     args = parse_args()
-    torch.manual_seed(args["seed"])
     random.seed(args["seed"])
+    torch.manual_seed(args["seed"])
+    np.random.seed(args["seed"])
+    if not os.path.exists("revs_W_map.matrix"):
+        args["remain_l"] = Preprocess.data_process(args["max_l"])
+    revs_dict, args["W"], word_idx_map = torch.load("revs_W_map.matrix")
+    
     data = []
 
     if args["eval"]:
         model = torch.load("all_"+args["model"]+".model")
-        data = partition_data(args)
+        revs = revs_dict[args["data_set"]]
+        data = make_idx_data(revs, word_idx_map, args["remain_l"], args["cross_validation"])
         Train.eval(data[2], model, args)
         exit()
 
@@ -166,10 +209,14 @@ def main():
 
     if args["test_all"] and args["run_cv"]:
         args["data_set"] = "all"
+        revs = []
+        for domain in domain_set:
+            revs += revs_dict[domain]
+        random.shuffle(revs)
         result_list = []
-        for i in range(10):
+        for i in range(5):
             args["cross_validation"] = i
-            data = partition_data(args)
+            data = make_idx_data(revs, word_idx_map, args["remain_l"], args["cross_validation"])
             model = find_model(args)
             Train.train(data[0], data[1], model, args)
             print('\nTest set result:\n')
@@ -180,13 +227,12 @@ def main():
             result = []
             all_result = Train.eval(data[2], model, args)
             for domain in domain_set:
-                args["data_set"] = domain
-                data = partition_data(args)
+                sub_revs = revs_dict[domain]
+                data = make_idx_data(sub_revs, word_idx_map, args["remain_l"], args["cross_validation"])
                 result.append(Train.eval(data[2], model, args))
             result.append(all_result)
             result = np.array(result)
             result_list.append(result)
-            args["data_set"] = "all"
         np.set_printoptions(precision=4)
         result_list = np.array(result_list)
         print(result_list)
@@ -194,7 +240,10 @@ def main():
     
     if args["test_all"]:
         args["data_set"] = "all"
-        data = partition_data(args)
+        for domain in domain_set:
+            revs += revs_dict[domain]
+        random.shuffle(revs)
+        data = make_idx_data(revs, word_idx_map, args["remain_l"], args["cross_validation"])
         model = find_model(args)
         Train.train(data[0], data[1], model, args)
         print('\nTest set result:\n')
@@ -205,8 +254,8 @@ def main():
         result = []
         all_result = Train.eval(data[2], model, args)
         for domain in domain_set:
-            args["data_set"] = domain
-            data = partition_data(args)
+            sub_revs = revs_dict[domain]
+            data = make_idx_data(sub_revs, word_idx_map, args["remain_l"], args["cross_validation"])
             result.append(Train.eval(data[2], model, args))
         result.append(all_result)
         result = np.array(result)
@@ -220,7 +269,8 @@ def main():
         result_list = []
         for i in range(10):
             args["cross_validation"] = i
-            data = partition_data(args)
+            revs = revs_dict[args["data_set"]]
+            data = make_idx_data(revs, word_idx_map, args["remain_l"], args["cross_validation"])
             model = find_model(args)
             Train.train(data[0], data[1], model, args)
             print('\nTest set result:\n')
@@ -231,7 +281,8 @@ def main():
         print(result)
         print('Average: {:.4f}%,    Standard Deviation: {:.4f}%'.format(result.mean(), result.std()))
     else:
-        data = partition_data(args)
+        revs = revs_dict[args["data_set"]]
+        data = make_idx_data(revs, word_idx_map, args["remain_l"], args["cross_validation"])
         model = find_model(args)
         Train.train(data[0], data[1], model, args)
         print('\nTest set result:\n')

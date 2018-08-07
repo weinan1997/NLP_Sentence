@@ -25,17 +25,17 @@ def train(train_set, dev_set, model, args):
         for batch in range(0, batch_num):
 
             if batch == batch_num-1:
-                feature = train_set[0][batch*batch_size:]
-                target = train_set[1][batch*batch_size:]
-                domain = train_set[2][batch*batch_size:]
+                feature = train_set[batch*batch_size:, :-2]
+                target = train_set[batch*batch_size:, -2]
+                domain = train_set[batch*batch_size:, -1]
             else:
-                feature = train_set[0][batch*batch_size:(batch+1)*batch_size]
-                target = train_set[1][batch*batch_size:(batch+1)*batch_size]
-                domain = train_set[2][batch*batch_size:(batch+1)*batch_size]
+                feature = train_set[batch*batch_size:(batch+1)*batch_size, :-2]
+                target = train_set[batch*batch_size:(batch+1)*batch_size, -2]
+                domain = train_set[batch*batch_size:(batch+1)*batch_size, -1]
             
-            feature = torch.tensor(np.array(feature))
-            target = torch.tensor(np.array(target))
-            domain = torch.tensor(np.array(domain))
+            feature = torch.tensor(feature)
+            target = torch.tensor(target)
+            domain = torch.tensor(domain)
             
             if torch.cuda.is_available():
                 feature = feature.cuda(args["GPU"])
@@ -65,7 +65,7 @@ def train(train_set, dev_set, model, args):
             ave_acc = ave_acc + float(corrects)
             sys.stdout.write('\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(batch+epoch*batch_num, loss.item(), accuracy, corrects, len(feature)))
 
-        ave_acc = ave_acc / len(train_set[0]) * 100
+        ave_acc = ave_acc / train_set.shape[0] * 100
         print('\nEpoch: {} - Train accuracy: {:.4f}%'.format(epoch, ave_acc))
         dev_acc = eval(dev_set, model, args)
         if dev_acc > best_acc:
@@ -95,12 +95,9 @@ def train(train_set, dev_set, model, args):
 def eval(data_set, model, args):
     model.eval()
     with torch.no_grad():
-        feature, target, domain = data_set
-        if args["data_set"] == "all":
-            domain_all = data_set[2]
-        feature = torch.tensor(np.array(feature))
-        target = torch.tensor(np.array(target))
-        domain = torch.tensor(np.array(domain))
+        feature = torch.tensor(data_set[:, :-2])
+        target = torch.tensor(data_set[:, -2])
+        domain = torch.tensor(data_set[:, -1])
         
         if torch.cuda.is_available():
             feature = feature.cuda(args["GPU"])

@@ -9,22 +9,30 @@ class DAM_Sentence(nn.Module):
         self.hidden_dim = args["lstm_dim"]
         self.layer_num = args["layer_num"]
         self.vec_len = args["vec_len"]
-        self.dropout = args["dropout"]
+        self.dp = args["dropout"]
         self.batch_size = args["batch_size"]
         self.remain_l = args["remain_l"]
+        self.word2vec = args["W"]
 
+
+        self.embedding = nn.Embedding(self.word2vec.shape[0], self.vec_len)
+        self.embedding.weight.data.copy_(torch.from_numpy(self.word2vec))
         self.domain_lstm = nn.LSTM(self.vec_len, self.hidden_dim, bidirectional=True)
+        self.dropout1 = nn.Dropout(self.dp)
         self.domain_fc = nn.Linear(2*self.hidden_dim, 4)
         self.sentiment_lstm = nn.LSTM(self.vec_len, self.hidden_dim, bidirectional=True)
         self.attention = nn.Linear(self.hidden_dim*4, 1)
+        self.dropout2 = nn.Dropout(self.dp)
         self.sentiment_fc = nn.Linear(self.hidden_dim*2, 2)
 
     def forward(self, x):
+        x = self.embedding(x)
         Hd, _ = self.domain_lstm(x.permute(1, 0, 2))
         Hd = Hd.permute(1, 2, 0)
         hd = F.max_pool1d(Hd, Hd.size(2))
         hd = hd.squeeze(2)
-        d = self.domain_fc(hd)
+        hd_drop = self.dropout2(hd)
+        d = self.domain_fc(hd_drop)
         Hs, _ = self.sentiment_lstm(x.permute(1, 0, 2))
         Hs = Hs.permute(1, 0, 2)
         hd = hd.unsqueeze(1)
@@ -35,6 +43,7 @@ class DAM_Sentence(nn.Module):
         alpha = alpha.permute(0, 2, 1)
         Hs = torch.bmm(alpha, Hs)
         Hs = Hs.squeeze(1)
+        Hs = self.dropout1(Hs)
         output = self.sentiment_fc(Hs)
         return [output, d]
 

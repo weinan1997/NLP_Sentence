@@ -108,3 +108,4 @@ venv.bak/
 *.bin
 *.wordvec
 *.model
+*.matrix

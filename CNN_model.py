@@ -22,13 +22,17 @@ class CNN_Sentence(nn.Module):
         self.kernel_sizes = args["kernel_sizes"]
         self.filter_num = len(self.kernel_sizes)
         self.kernel_num = args["kernel_num"]
-        self.dropout = args["dropout"]
-        
+        self.dp = args["dropout"]
+        self.word2vec = args["W"]
+
+        self.embedding = nn.Embedding(self.word2vec.shape[0], self.vec_len)
+        self.embedding.weight.data.copy_(torch.from_numpy(self.word2vec))
         self.convs = nn.ModuleList([nn.Conv2d(1, self.kernel_num, (k, self.vec_len)) for k in self.kernel_sizes])
-        self.dropout = nn.Dropout(self.dropout)
+        self.dropout = nn.Dropout(self.dp)
         self.fc = nn.Linear(self.filter_num*self.kernel_num, 2)
         
     def forward(self, x):
+        x = self.embedding(x)
         x = x.unsqueeze(1)
         Xs = []
         for i in range(self.filter_num):

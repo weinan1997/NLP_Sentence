@@ -63,7 +63,7 @@ def add_unknown_words(word_vecs, vocab, k=300):
             word_vecs[word] = np.random.uniform(-0.25,0.25,k)  
 
 
-def build_data(data_folder, clean_string=True):
+def build_data(data_folder, domain, cv=5, clean_string=True):
     """
     Loads data and split into 10 folds.
     """
@@ -82,9 +82,10 @@ def build_data(data_folder, clean_string=True):
         for word in words:
             vocab.add(word)
         datum  = {"y":1, 
+                  "domain":domain,
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(0, 10)}
+                  "split": np.random.randint(0, cv)}
         revs.append(datum)
     for review in neg_review:   
         rev = []
@@ -97,9 +98,10 @@ def build_data(data_folder, clean_string=True):
         for word in words:
             vocab.add(word)
         datum  = {"y":0, 
+                  "domain":domain,
                   "text": orig_rev,                             
                   "num_words": len(orig_rev.split()),
-                  "split": np.random.randint(0, 10)}
+                  "split": np.random.randint(0, cv)}
         revs.append(datum)
     random.shuffle(revs)
     return revs, vocab
@@ -120,37 +122,38 @@ def get_W(word_vecs, k=300):
         i += 1
     return W, word_idx_map
 
-def get_idx_from_sent(sent, word_idx_map, max_l, k=300):
-    """
-    Transforms sentence into a list of indices. Pad with zeroes. Remove words that exceed max_l.
-    """
-    x = []
-    words = sent.split()
-    if len(words) > max_l:
-        words = words[:max_l]
-    for word in words:
-        if word in word_idx_map:
-            x.append(word_idx_map[word])
-    while len(x) < max_l:
-        x.append(0)
-    return x
+# def get_idx_from_sent(sent, word_idx_map, max_l, k=300):
+#     """
+#     Transforms sentence into a list of indices. Pad with zeroes. Remove words that exceed max_l.
+#     """
+#     x = []
+#     words = sent.split()
+#     if len(words) > max_l:
+#         words = words[:max_l]
+#     for word in words:
+#         if word in word_idx_map:
+#             x.append(word_idx_map[word])
+#     while len(x) < max_l:
+#         x.append(0)
+#     return x
 
-def make_idx_data(revs, word_idx_map, max_l, k=300):
-    """
-    Transforms sentences into a 2-d matrix.
-    """
-    data_partitions = [list() for k in range(0, 10)]
-    for rev in revs:
-        sent = get_idx_from_sent(rev["text"], word_idx_map, max_l)
-        sent.append(rev["y"])
-        data_partitions[rev["split"]].append(sent)
-    return data_partitions     
+# def make_idx_data(revs, word_idx_map, max_l, k=300):
+#     """
+#     Transforms sentences into a 2-d matrix.
+#     """
+#     data_partitions = [list() for k in range(0, 10)]
+#     for rev in revs:
+#         sent = get_idx_from_sent(rev["text"], word_idx_map, max_l)
+#         sent.append(rev["y"])
+#         data_partitions[rev["split"]].append(sent)
+#     return data_partitions     
 
 
 def data_process(max_l):  
     max_remain = 0
     data_file = ["books", "dvd", "electronics", "kitchen"]
-    revs_list, vocab_list = [], []
+    revs_dict, vocab_list = {}, []
+    domain = 0
     for file_name in data_file:
         path = "../../../data1/weinan/"
         if os.path.exists(path):
@@ -163,8 +166,9 @@ def data_process(max_l):
         neg_reviews = review_extract(neg_file)
         data_folder = [pos_reviews, neg_reviews]
         print("loading data of {}...".format(file_name))  
-        revs, vocab = build_data(data_folder, clean_string=True)
-        revs_list.append(revs)
+        revs, vocab = build_data(data_folder, domain, clean_string=True)
+        domain = domain + 1
+        revs_dict[file_name] = revs
         vocab_list.append(vocab)
         max_length = np.max(pd.DataFrame(revs)["num_words"])
         print("data loaded!")
@@ -187,42 +191,46 @@ def data_process(max_l):
     print("num words already in word2vec: " + str(len(w2v)) + "\n")
     add_unknown_words(w2v, vocab)
     W, word_idx_map= get_W(w2v)
+
+    torch.save([revs_dict, W, word_idx_map], "revs_W_map.matrix")
+
+    return max_remain
     
-    print("create word vectors...")
-    for i in range(len(data_file)):
-        processed_data = []
-        data_set = make_idx_data(revs_list[i], word_idx_map, max_remain)
-        for data in data_set:
-            data = np.array(data)
-            X = []
-            Y = []
-            Z = []
-            for index_array in data:
-                x = []
-                for index in index_array[0:-1]:
-                    x.append(W[index])
-                x = np.matrix(x)
-                X.append(x)
-                Y.append(index_array[-1])
-                Z.append(i)
-            processed_data.append([X, Y, Z])
-        path = "../../../data1/weinan/"
-        if os.path.exists(path):
-            torch.save(processed_data, path+data_file[i]+".wordvec")
-        else:
-            torch.save(processed_data, data_file[i] + ".wordvec")
-    print("finish creating")
-    return max_remain
+    # print("create word vectors...")
+    # for i in range(len(data_file)):
+    #     processed_data = []
+    #     data_set = make_idx_data(revs_dict[data_file[i]], word_idx_map, max_remain)
+    #     for data in data_set:
+    #         data = np.array(data)
+    #         X = []
+    #         Y = []
+    #         Z = []
+    #         for index_array in data:
+    #             x = []
+    #             for index in index_array[0:-1]:
+    #                 x.append(W[index])
+    #             x = np.matrix(x)
+    #             X.append(x)
+    #             Y.append(index_array[-1])
+    #             Z.append(i)
+    #         processed_data.append([X, Y, Z])
+    #     path = "../../../data1/weinan/"
+    #     if os.path.exists(path):
+    #         torch.save(processed_data, path+data_file[i]+".wordvec")
+    #     else:
+    #         torch.save(processed_data, data_file[i] + ".wordvec")
+    # print("finish creating")
+    
 
-def save_data(max_l):
-    max_remain = data_process(max_l)
-    print("data saved")
-    return max_remain
+# def save_data(max_l):
+#     max_remain = data_process(max_l)
+#     print("data saved")
+#     return max_remain
 
-def load_data(file_name):
-    data = torch.load(file_name)
-    print("data loaded")
-    return data
+# def load_data(file_name):
+#     data = torch.load(file_name)
+#     print("data loaded")
+#     return data
 
 
 

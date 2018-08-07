@@ -10,7 +10,11 @@ class GS_Sentence(nn.Module):
         self.args = args
         self.domain_num = 4
         self.hidden_dim = args["attention_dim"]
+        self.vec_len = args["vec_len"]
+        self.word2vec = args["W"]
 
+        self.embedding = nn.Embedding(self.word2vec.shape[0], self.vec_len)
+        self.embedding.weight.data.copy_(torch.from_numpy(self.word2vec))
         self.general = General(args)
         self.specifics = nn.ModuleList([Specific(args, k) for k in range(self.domain_num)])
         if torch.cuda.is_available():
@@ -19,6 +23,7 @@ class GS_Sentence(nn.Module):
         self.fc = nn.Linear(self.hidden_dim*2*2, 2)   
 
     def forward(self, x, z):
+        x = self.embedding(x)
         general_output = self.general(x)
         specific_outputs = [self.specifics[k](x) for k in range(self.domain_num)]
         all_outputs = specific_outputs[z[0]][0]
@@ -49,9 +54,12 @@ class General(nn.Module):
         
         self.hidden_dim = args["attention_dim"]
         self.vec_len = args["vec_len"]
+        self.dp = args["dropout"]
+
         self.lstm = nn.LSTM(self.vec_len, self.hidden_dim, bidirectional=True)
         self.att_weight = nn.Parameter(torch.rand(2*self.hidden_dim, 1))
         self.attention = nn.Linear(self.hidden_dim*2, 2*self.hidden_dim)
+        self.dropout = nn.Dropout(self.dp)
         self.fc = nn.Linear(self.hidden_dim*2, 2)
 
     def forward(self, x):
@@ -63,6 +71,7 @@ class General(nn.Module):
         u = F.softmax(u, dim=1)
         u = u.permute(0, 2, 1)
         output = torch.bmm(u, h)
+        output = self.dropout(output)
         return output
     
     def loss(self, x, y):
@@ -78,9 +87,12 @@ class Specific(nn.Module):
         self.domain = domain
         self.hidden_dim = args["attention_dim"]
         self.vec_len = args["vec_len"]
+        self.dp = args["dropout"]
+
         self.lstm = nn.LSTM(self.vec_len, self.hidden_dim, bidirectional=True)
         self.att_weight = nn.Parameter(torch.rand(2*self.hidden_dim, 1))
         self.attention = nn.Linear(self.hidden_dim*2, 2*self.hidden_dim)
+        self.dropout = nn.Dropout(self.dp)
         self.fc = nn.Linear(2*self.hidden_dim, 3)
 
 
@@ -93,6 +105,7 @@ class Specific(nn.Module):
         u = F.softmax(u, dim=1)
         u = u.permute(0, 2, 1)
         output = torch.bmm(u, h)
+        output = self.dropout(output)
         return output
 
     def loss(self, x, y, z):
