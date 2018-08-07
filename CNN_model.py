@@ -41,6 +41,7 @@ class CNN_Sentence(nn.Module):
             temp = F.max_pool1d(temp, temp.size(2))
             Xs.append(temp)
         x = torch.cat(Xs, 1)
+        del Xs
         x = x.squeeze(2)
         self.dropout(x)
         x = self.fc(x)

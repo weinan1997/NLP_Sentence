@@ -16,7 +16,7 @@ class GRU_Sentence(nn.Module):
 
         self.embedding = nn.Embedding(self.word2vec.shape[0], self.vec_len)
         self.embedding.weight.data.copy_(torch.from_numpy(self.word2vec))
-        self.dropout = nn.Dropout(self.dp)
+        self.dropout = nn.Dropout(self.dp, inplace=True)
         self.gru = nn.GRU(self.vec_len, self.hidden_dim, bidirectional=True)
         self.fc = nn.Linear(2*self.hidden_dim, 2)
 
@@ -27,6 +27,6 @@ class GRU_Sentence(nn.Module):
         x = x.permute(1, 2, 0)
         x = F.max_pool1d(x, x.size(2))
         x = x.squeeze(2)
-        x = self.dropout(x)
+        self.dropout(x)
         output = self.fc(x)
         return output
