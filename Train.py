@@ -11,7 +11,7 @@ import DAM_model
 def train(train_set, dev_set, model, args):
     optimizer = torch.optim.Adam(model.parameters())
     batch_size = args["batch_size"]
-    input_num = len(train_set[0])
+    input_num = train.shape[0]
     batch_num = input_num//batch_size
     if input_num % batch_size != 0:
         batch_num = batch_num + 1
@@ -65,7 +65,6 @@ def train(train_set, dev_set, model, args):
             ave_acc = ave_acc + float(corrects)
             sys.stdout.write('\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(batch+epoch*batch_num, loss.item(), accuracy, corrects, len(feature)))
 
-            del feature, target, domain
 
         ave_acc = ave_acc / train_set.shape[0] * 100
         print('\nEpoch: {} - Train accuracy: {:.4f}%'.format(epoch, ave_acc))
