@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument('-a', "--attention_dim", default=100, type=int, help="attention size")
     parser.add_argument('-g', "--gpu", default=0, type=int,help="GPU number")
     parser.add_argument('-s', "--seed", default=1, type=int, help="set random seed")
-    parser.add_argument('-c', "--cross_validation", default=9, type=int, help="set the data set as test set")
+    parser.add_argument('-c', "--cross_validation", default=0, type=int, help="set the data set as test set")
     parser.add_argument("--run_cv", default=False, type=bool, help="run through all cross validation test")
     parser.add_argument("--test_all", default=False, type=bool, help="train model on the whole set and test in each domain")
     parser.add_argument('-r', "--regular", default=0.03, type=float, help="set the regular coefficient for DAM")
