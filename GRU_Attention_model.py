@@ -15,6 +15,7 @@ class GRU_Attention_Sentence(nn.Module):
         self.dp = args["dropout"]
         self.domain_num = args["domain_num"]
         self.seq_len = args["remain_l"]
+        self.gpu = args["GPU"]
 
         self.embedding = nn.Embedding(self.word2vec.shape[0], self.vec_len)
         self.embedding.weight.data.copy_(torch.from_numpy(self.word2vec))
@@ -28,6 +29,8 @@ class GRU_Attention_Sentence(nn.Module):
         h, _ = self.gru(x.permute(1, 0, 2))
         h = h.permute(1, 0, 2)
         atte_applied = torch.zeros(x.shape[0], self.seq_len)
+        if torch.cuda.is_available():
+            atte_applied = atte_applied.cuda(self.gpu)
         for row in range(x.shape[0]):
             u = torch.matmul(h[row].squeeze(0), F.softmax(self.att_weight[:, z[row]], dim=0))
             atte_applied[row] = u
