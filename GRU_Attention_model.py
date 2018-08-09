@@ -20,19 +20,19 @@ class GRU_Attention_Sentence(nn.Module):
         self.embedding = nn.Embedding(self.word2vec.shape[0], self.vec_len)
         self.embedding.weight.data.copy_(torch.from_numpy(self.word2vec))
         self.gru = nn.GRU(self.vec_len, self.hidden_dim, bidirectional=True)
-        self.att_weight = nn.Parameter(torch.rand(2*self.hidden_dim, self.domain_num))
+        self.att_weight = nn.Parameter(torch.rand(self.domain_num, self.seq_len))
         self.dropout = nn.Dropout(self.dp, inplace=True)
-        self.fc = nn.Linear(self.seq_len, 2)
+        self.fc = nn.Linear(2*self.hidden_dim, 2)
 
     def forward(self, x, z):
         x = self.embedding(x)
         h, _ = self.gru(x.permute(1, 0, 2))
         h = h.permute(1, 0, 2)
-        atte_applied = torch.zeros(x.shape[0], self.seq_len)
+        atte_applied = torch.zeros(x.shape[0], 2*self.hidden_dim)
         if torch.cuda.is_available():
             atte_applied = atte_applied.cuda(self.gpu)
         for row in range(x.shape[0]):
-            u = torch.matmul(h[row].squeeze(0), F.softmax(self.att_weight[:, z[row]], dim=0))
+            u = torch.matmul(F.softmax(self.att_weight[z[row]], dim=0), h[row])
             atte_applied[row] = u
         self.dropout(atte_applied)
         output = self.fc(atte_applied)
