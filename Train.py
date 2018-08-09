@@ -61,7 +61,10 @@ def train(train_set, dev_set, model, args):
                 optimizer.step()
             else:
                 optimizer.zero_grad()
-                output = model(feature)
+                if args["model"] == "gru_attention":
+                    output = model(feature, domain)
+                else:
+                    output = model(feature)
                 loss = F.cross_entropy(output, target)
                 loss.backward()
                 optimizer.step()

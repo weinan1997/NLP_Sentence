@@ -68,7 +68,8 @@ def parse_args():
         "learning_rate": options.learning_rate,
         "vec_len": 300,
         "layer_num": 1,
-        "remain_l": 426
+        "remain_l": 426,
+        "domain_num": 4
     }
     return args
         
