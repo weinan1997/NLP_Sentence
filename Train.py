@@ -120,7 +120,10 @@ def eval(data_set, model, args):
             output, general_output, specific_outputs = model(feature, domain)
             loss = model.loss(output, general_output, specific_outputs, target, domain, args["lambda1"], args["lambda2"])
         else:
-            output = model(feature)
+            if args["model"] == "gru_attention":
+                output = model(feature, domain)
+            else:
+                output = model(feature)
             loss = F.cross_entropy(output, target)
         correct = (torch.max(output, 1)[1].view(target.size()) == target).sum()
         size = len(feature)
