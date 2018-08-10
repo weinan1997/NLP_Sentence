@@ -2,7 +2,8 @@ import os
 import torch
 import CNN_model
 import GRU_model
-import GRU_Attention_model
+import GRU_domain_att_model
+import GRU_ramdom_att_model
 import CNN_Attention_model
 import CNN_Att_Pool_model
 import DAM_model
@@ -20,7 +21,7 @@ model_set = ["cnn", "cnn_attention", "gru", "gru_attention", "dam"]
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Sentiment Analysis")
-    parser.add_argument('-m', "--model", default="cnn", help="available models: cnn, gru, gru_attention, cnn_att_pool, gs")
+    parser.add_argument('-m', "--model", default="cnn", help="available models: cnn, gru, gru_domain, gru_random, cnn_att_pool, gs")
     parser.add_argument("--max_l", default=90, type=int, help="percentage of sentences' lengths")
     parser.add_argument("--kernel_sizes", default=[3,4,5], type=list, help="kernel sizes for convolution")
     parser.add_argument("--kernel_num", default=100, type=int, help="number of output filters")
@@ -115,8 +116,10 @@ def find_model(args):
         model = CNN_model.CNN_Sentence(args)
     elif args["model"] == "gru":
         model = GRU_model.GRU_Sentence(args)
-    elif args["model"] == "gru_attention":
-        model = GRU_Attention_model.GRU_Attention_Sentence(args)
+    elif args["model"] == "gru_domain":
+        model = GRU_domain_att_model.GRU_Attention_Sentence(args)
+    elif args["model"] == "gru_random":
+        model = GRU_ramdom_att_model.GRU_random_att_Sentence(args)
     elif args["model"] == "cnn_attention":
         model = CNN_Attention_model.CNN_Attention_Sentence(args)
     elif args["model"] == "cnn_att_pool":

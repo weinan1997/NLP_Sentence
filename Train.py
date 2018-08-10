@@ -61,7 +61,7 @@ def train(train_set, dev_set, model, args):
                 optimizer.step()
             else:
                 optimizer.zero_grad()
-                if args["model"] == "gru_attention":
+                if args["model"] == "gru_domain":
                     output = model(feature, domain)
                 else:
                     output = model(feature)
@@ -120,7 +120,7 @@ def eval(data_set, model, args):
             output, general_output, specific_outputs = model(feature, domain)
             loss = model.loss(output, general_output, specific_outputs, target, domain, args["lambda1"], args["lambda2"])
         else:
-            if args["model"] == "gru_attention":
+            if args["model"] == "gru_domain":
                 output = model(feature, domain)
             else:
                 output = model(feature)
