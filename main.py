@@ -4,6 +4,7 @@ import CNN_model
 import GRU_model
 import GRU_domain_att_model
 import GRU_ramdom_att_model
+import GRU_att_model
 import CNN_Attention_model
 import CNN_Att_Pool_model
 import DAM_model
@@ -116,6 +117,8 @@ def find_model(args):
         model = CNN_model.CNN_Sentence(args)
     elif args["model"] == "gru":
         model = GRU_model.GRU_Sentence(args)
+    elif args["model"] == "gru_attention":
+        model = GRU_att_model.AttentionWordRNN(args)
     elif args["model"] == "gru_domain":
         model = GRU_domain_att_model.GRU_Attention_Sentence(args)
     elif args["model"] == "gru_random":
