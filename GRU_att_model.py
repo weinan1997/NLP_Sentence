@@ -66,6 +66,7 @@ class AttentionWordRNN(nn.Module):
         self.word_gru_hidden = args["attention_dim"]
         self.word2vec = args["W"]
         self.vec_len = args["vec_len"]
+        self.batch_size = args["batch_size"]
 
         
         self.lookup = nn.Embedding(self.word2vec.shape[0], self.vec_len)
@@ -82,12 +83,12 @@ class AttentionWordRNN(nn.Module):
 
         
         
-    def forward(self, embed):
+    def forward(self, embed, state):
         # embeddings
         embedded = self.lookup(embed)
         embedded = embedded.permute(1, 0, 2)
         # word level gru
-        output_word, _ = self.word_gru(embedded)
+        output_word, state = self.word_gru(embedded, state)
 #         print output_word.size()
         word_squish = batch_matmul_bias(output_word, self.weight_W_word,self.bias_word, nonlinearity='tanh')
         word_attn = batch_matmul(word_squish, self.weight_proj_word)
@@ -96,3 +97,6 @@ class AttentionWordRNN(nn.Module):
         output = self.fc(word_attn_vectors)
             
         return output 
+
+    def init_hidden(self):
+        return Variable(torch.zeros(2, self.batch_size, self.word_gru_hidden))
