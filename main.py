@@ -32,6 +32,7 @@ def parse_args():
     parser.add_argument("--early_stop", default=5, type=int, help="early stop number")
     parser.add_argument('-d', "--data_set", default="books", help="available data set: books, dvd, electronics, kitchen, all")
     parser.add_argument("--eval", default=False, type=bool, help="train or evaluation")
+    parser.add_argument('-p', "--print_attention", default=False, type=bool, help="print attention weight" )
     parser.add_argument("--hidden_size", default=100, type=int, help="hidden size for LSTM")
     parser.add_argument('-a', "--attention_dim", default=100, type=int, help="attention size")
     parser.add_argument('-g', "--gpu", default=0, type=int,help="GPU number")
@@ -56,6 +57,7 @@ def parse_args():
         "early_stop": options.early_stop,
         "data_set": options.data_set,
         "eval": options.eval,
+        "print_attention": options.print_attention,
         "lstm_dim": options.hidden_size,
         "attention_dim": options.attention_dim,
         "GPU": options.gpu,
@@ -149,6 +151,12 @@ def main():
     revs_dict, args["W"], word_idx_map = torch.load("revs_W_map.matrix")
     
     data = []
+
+    if args["print_attention"]:
+        model = torch.load("all_"+args["model"]+".model")
+        revs = revs_dict[args["data_set"]]
+        model.calculate_att_weight(revs, word_idx_map)
+        exit()
 
     if args["eval"]:
         model = torch.load("all_"+args["model"]+".model")
