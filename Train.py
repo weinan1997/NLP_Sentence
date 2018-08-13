@@ -17,9 +17,6 @@ def train(train_set, dev_set, model, args):
     elif args["optim_func"] == "SGD":
         optimizer = torch.optim.SGD(model.parameters(), lr=args["learning_rate"], momentum=0.9)
 
-    state = model.init_hidden()
-    if torch.cuda.is_available():
-        state = state.cuda(args["GPU"])
 
     batch_size = args["batch_size"]
     input_num = train_set.shape[0]
@@ -69,8 +66,6 @@ def train(train_set, dev_set, model, args):
                 optimizer.zero_grad()
                 if args["model"] == "gru_domain":
                     output = model(feature, domain)
-                elif args["model"] == "gru_attention":
-                    output = model(feature, state)
                 else:
                     output = model(feature)
                 loss = F.cross_entropy(output, target)
@@ -115,14 +110,12 @@ def eval(data_set, model, args):
         feature = torch.tensor(data_set[:, :-2])
         target = torch.tensor(data_set[:, -2])
         domain = torch.tensor(data_set[:, -1])
-        state = model.init_hidden()
 
         
         if torch.cuda.is_available():
             feature = feature.cuda(args["GPU"])
             target = target.cuda(args["GPU"])
             domain = domain.cuda(args["GPU"])
-            state = state.cuda(args["GPU"])
 
         if args["model"] == "dam":
             output, d = model(feature)

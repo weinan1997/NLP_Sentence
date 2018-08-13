@@ -83,12 +83,12 @@ class AttentionWordRNN(nn.Module):
 
         
         
-    def forward(self, embed, state):
+    def forward(self, embed):
         # embeddings
         embedded = self.lookup(embed)
         embedded = embedded.permute(1, 0, 2)
         # word level gru
-        output_word, state = self.word_gru(embedded, state)
+        output_word, _ = self.word_gru(embedded)
 #         print output_word.size()
         word_squish = batch_matmul_bias(output_word, self.weight_W_word,self.bias_word, nonlinearity='tanh')
         word_attn = batch_matmul(word_squish, self.weight_proj_word)
