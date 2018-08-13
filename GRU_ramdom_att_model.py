@@ -102,12 +102,14 @@ class GRU_random_att_Sentence(nn.Module):
                 pword_weight[word] /= pword_num[word]
         temp_p = sorted(pword_weight.items(), key=lambda item:item[1], reverse=True)
         temp_n = sorted(nword_weight.items(), key=lambda item:item[1], reverse=True)
-        print('POSITIVE:')
+        print('Top 50 positive:')
+        print('{:20s}{:.6s}       {:.6s}'.format('word', 'pos', 'neg'))
         for word, _ in temp_p[0: 50]:
-            print('{:15s}    {:.4f}    {:.4f}'.format(word, pword_weight[word], nword_weight[word]))
-        print('\n\nNEGATIVE')
+            print('{:20s}{:.4f}    {:.4f}'.format(word, pword_weight[word], nword_weight[word]))
+        print('\n\nTop 50 negative')
+        print('{:20s}{:.6s}       {:.6s}'.format('word', 'pos', 'neg'))
         for word, _ in temp_n[0: 50]:
-            print('{:15s}    {:.4f}    {:.4f}'.format(word, pword_weight[word], nword_weight[word]))
+            print('{:20s}{:.4f}    {:.4f}'.format(word, pword_weight[word], nword_weight[word]))
                         
 
 
