@@ -55,6 +55,8 @@ class GRU_random_att_Sentence(nn.Module):
                 idx = self.get_idx_from_sent(rev["text"], word_idx_map, self.seq_len)
                 x.append(idx)
             x = torch.tensor(x)
+            if torch.cuda.is_available():
+                x = x.cuda()
             x = self.embedding(x)
             h, _ = self.gru(x.permute(1, 0, 2))
             h = h.permute(1, 0, 2)
